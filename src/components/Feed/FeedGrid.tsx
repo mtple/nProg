@@ -4,15 +4,18 @@ import { useMemo } from "react";
 import { useTimeline } from "@/hooks/useTimeline";
 import TrackTile from "./TrackTile";
 import TrackRow from "./TrackRow";
+import CollectionRow from "./CollectionRow";
+import type { Collection } from "./CollectionRow";
+import ArtistMosaic from "./ArtistMosaic";
 import Scribble from "@/components/ui/Scribble";
 
-export default function FeedGrid({ artist }: { artist?: string }) {
+export default function FeedGrid({ artist, collection }: { artist?: string; collection?: string }) {
   const { tracks, isLoading, isFetchingMore, hasMore, loadMore, error } =
-    useTimeline(artist);
+    useTimeline(artist, collection);
 
-  // Group tracks by artist for rows (only when we have enough variety)
+  // Group tracks by artist (home page only)
   const artistGroups = useMemo(() => {
-    if (artist) return null;
+    if (artist || collection) return null;
 
     const groups = new Map<string, { name: string; address: string; tracks: typeof tracks }>();
     for (const track of tracks) {
@@ -23,7 +26,38 @@ export default function FeedGrid({ artist }: { artist?: string }) {
       groups.get(key)!.tracks.push(track);
     }
     return Array.from(groups.values());
-  }, [tracks, artist]);
+  }, [tracks, artist, collection]);
+
+  // Derive collections from audio tracks (home page only)
+  const collections = useMemo(() => {
+    if (artist || collection) return null;
+
+    const groups = new Map<string, { tracks: typeof tracks }>();
+    for (const track of tracks) {
+      const key = track.address.toLowerCase();
+      if (!groups.has(key)) {
+        groups.set(key, { tracks: [] });
+      }
+      groups.get(key)!.tracks.push(track);
+    }
+
+    const result: Collection[] = [];
+    for (const [addr, group] of groups) {
+      if (group.tracks.length < 2) continue;
+      const first = group.tracks[0];
+      result.push({
+        address: addr,
+        name: first.artist,
+        artist: first.artist,
+        artworkUrl: first.artworkUrl,
+        trackCount: group.tracks.length,
+      });
+    }
+
+    // Sort by track count descending
+    result.sort((a, b) => b.trackCount - a.trackCount);
+    return result;
+  }, [tracks, artist, collection]);
 
   if (error) {
     return (
@@ -55,10 +89,8 @@ export default function FeedGrid({ artist }: { artist?: string }) {
     );
   }
 
-  const multiTrackArtists = artistGroups?.filter((g) => g.tracks.length >= 2) ?? [];
-
-  // Artist page: simple grid
-  if (artist) {
+  // Artist or collection page: simple grid
+  if (artist || collection) {
     return (
       <div>
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -81,7 +113,7 @@ export default function FeedGrid({ artist }: { artist?: string }) {
     );
   }
 
-  // Home page: always use row layout
+  // Home page: Latest → Collections → Artist mosaic
   return (
     <div className="space-y-10">
       <TrackRow
@@ -90,15 +122,13 @@ export default function FeedGrid({ artist }: { artist?: string }) {
         allTracks={tracks}
       />
 
-      {multiTrackArtists.map((group) => (
-        <TrackRow
-          key={group.address}
-          title={group.name}
-          tracks={group.tracks}
-          allTracks={tracks}
-          artistAddress={group.address}
-        />
-      ))}
+      {collections && collections.length > 0 && (
+        <CollectionRow collections={collections} />
+      )}
+
+      {artistGroups && artistGroups.length > 0 && (
+        <ArtistMosaic groups={artistGroups} allTracks={tracks} />
+      )}
 
       {hasMore && (
         <div className="flex justify-center pb-4">

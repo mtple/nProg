@@ -16,7 +16,8 @@ export default function TrackTile({
   queue: Track[];
 }) {
   const { play, currentTrack, isPlaying, toggle } = useAudio();
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const imageLoaded = loadedSrc === track.artworkUrl;
 
   const isCurrentTrack = currentTrack?.id === track.id;
 
@@ -55,7 +56,7 @@ export default function TrackTile({
                 }`}
                 sizes="(max-width: 640px) 176px, 208px"
                 unoptimized
-                onLoad={() => setImageLoaded(true)}
+                onLoad={() => setLoadedSrc(track.artworkUrl)}
               />
             </>
           ) : (

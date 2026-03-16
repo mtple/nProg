@@ -71,7 +71,7 @@ async function resolveMetadataStreaming(
   moments: TimelineMoment[],
   queryClient: ReturnType<typeof useQueryClient>,
   onTracks: (tracks: Track[]) => void,
-  concurrency = 12
+  concurrency = 20
 ) {
   const valid = moments.filter((m) => !isBlocked(m));
   if (valid.length === 0) return;
@@ -134,9 +134,9 @@ async function resolveMetadataStreaming(
   });
 }
 
-const PAGES_PER_BATCH = 3;
+const PAGES_PER_BATCH = 2;
 
-export function useTimeline(artist?: string) {
+export function useTimeline(artist?: string, collection?: string) {
   const queryClient = useQueryClient();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -183,34 +183,36 @@ export function useTimeline(artist?: string) {
         (_, i) => startPage + i
       );
 
-      // Fetch pages and start resolving metadata as each page arrives
-      // instead of waiting for all pages then all metadata
+      // Fetch pages and start resolving metadata as each arrives.
+      // Don't await metadata — let it stream in the background.
       const resolvePromises: Promise<void>[] = [];
 
-      await Promise.allSettled(
-        pageNumbers.map(async (p) => {
-          const result = await fetchTimeline(p, TIMELINE_PAGE_SIZE, artist, undefined, {
+      const timelineResults = await Promise.allSettled(
+        pageNumbers.map((p) =>
+          fetchTimeline(p, TIMELINE_PAGE_SIZE, artist, collection, {
             audioOnly: true,
             hidden: false,
-          });
-
-          if (!mountedRef.current) return;
-
-          if (totalPagesRef.current === null) {
-            totalPagesRef.current = result.pagination.total_pages;
-          }
-
-          // Start resolving this page's metadata immediately
-          const promise = resolveMetadataStreaming(
-            result.moments,
-            queryClient,
-            appendTracks,
-          );
-          resolvePromises.push(promise);
-        })
+          })
+        )
       );
 
-      // Wait for all metadata resolution to finish
+      for (const result of timelineResults) {
+        if (result.status !== "fulfilled") continue;
+        if (!mountedRef.current) break;
+
+        totalPagesRef.current = result.value.pagination.total_pages;
+
+        // Fire off metadata resolution — don't await, let it stream
+        resolvePromises.push(
+          resolveMetadataStreaming(
+            result.value.moments,
+            queryClient,
+            appendTracks,
+          )
+        );
+      }
+
+      // Wait for all metadata to finish before allowing next batch
       await Promise.allSettled(resolvePromises);
 
       if (mountedRef.current) {
@@ -231,7 +233,7 @@ export function useTimeline(artist?: string) {
       fetchingRef.current = false;
       if (mountedRef.current) setIsFetchingMore(false);
     }
-  }, [artist, queryClient, appendTracks]);
+  }, [artist, collection, queryClient, appendTracks]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -268,8 +270,8 @@ export function useTimeline(artist?: string) {
       seen.add(t.id);
       return true;
     });
-    return artist ? deduped : diversifyTracks(deduped);
-  }, [tracks, artist]);
+    return (artist || collection) ? deduped : diversifyTracks(deduped);
+  }, [tracks, artist, collection]);
 
   return {
     tracks: diversified,
