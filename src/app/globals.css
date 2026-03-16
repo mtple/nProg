@@ -3,6 +3,7 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif);
 }
 
 html {
@@ -50,6 +51,21 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   background: #fafafa;
   border: none;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.35);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s ease-in-out infinite;
 }
 
 @keyframes shimmer {

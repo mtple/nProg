@@ -7,6 +7,17 @@ export interface Track {
   audioUrl: string;
   createdAt: string;
   description?: string;
+  address: string;
+  tokenId: string;
+  chainId: number;
+}
+
+export interface Comment {
+  id: string;
+  sender: string;
+  username: string;
+  comment: string;
+  timestamp: number;
 }
 
 export interface AudioPlayerState {

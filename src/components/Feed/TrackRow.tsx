@@ -37,12 +37,12 @@ export default function TrackRow({
           {artistAddress ? (
             <Link
               href={`/artist/${artistAddress}`}
-              className="text-lg font-semibold text-zinc-50 transition-colors hover:text-zinc-300"
+              className="font-serif text-lg font-semibold text-zinc-50 transition-colors hover:text-zinc-300"
             >
               {title}
             </Link>
           ) : (
-            <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
+            <h2 className="font-serif text-lg font-semibold text-zinc-50">{title}</h2>
           )}
         </div>
         <div className="flex gap-1">

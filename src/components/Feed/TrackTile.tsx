@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAudio } from "@/providers/AudioProvider";
+import Scribble from "@/components/ui/Scribble";
 import type { Track } from "@/types/audio";
 import { truncateAddress } from "@/lib/utils";
 
@@ -14,6 +16,7 @@ export default function TrackTile({
   queue: Track[];
 }) {
   const { play, currentTrack, isPlaying, toggle } = useAudio();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const isCurrentTrack = currentTrack?.id === track.id;
 
@@ -37,29 +40,27 @@ export default function TrackTile({
       <Link href={`/moment/${track.id}`} className="block">
         <div className="relative aspect-square overflow-hidden rounded bg-zinc-900">
           {track.artworkUrl ? (
-            <Image
-              src={track.artworkUrl}
-              alt={track.title}
-              fill
-              className="object-cover transition-all duration-300 group-hover:scale-[1.03] group-hover:brightness-75"
-              sizes="(max-width: 640px) 176px, 208px"
-              unoptimized
-            />
+            <>
+              {!imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+                  <Scribble className="h-12 w-12 text-zinc-600" />
+                </div>
+              )}
+              <Image
+                src={track.artworkUrl}
+                alt={track.title}
+                fill
+                className={`object-cover transition-all duration-300 group-hover:scale-[1.03] group-hover:brightness-75 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                sizes="(max-width: 640px) 176px, 208px"
+                unoptimized
+                onLoad={() => setImageLoaded(true)}
+              />
+            </>
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-zinc-800">
-              <svg
-                className="h-10 w-10 text-zinc-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
+              <Scribble className="h-12 w-12 text-zinc-600" />
             </div>
           )}
           <button
@@ -68,18 +69,20 @@ export default function TrackTile({
             aria-label={isCurrentTrack && isPlaying ? "Pause" : "Play"}
           >
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-zinc-900 shadow-lg transition-all ${
-                isCurrentTrack
-                  ? "scale-100 opacity-100"
-                  : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100"
+              className={`relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
+                isCurrentTrack && isPlaying
+                  ? "scale-100 opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.25)] animate-pulse-slow"
+                  : isCurrentTrack
+                    ? "scale-100 opacity-100 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                    : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]"
               }`}
             >
               {isCurrentTrack && isPlaying ? (
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                 </svg>
               ) : (
-                <svg className="h-4 w-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               )}

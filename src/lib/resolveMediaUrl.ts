@@ -29,14 +29,15 @@ export function resolveMediaUrl(uri: string): string {
 }
 
 /**
- * Resolve audio URI — uses Irys gateway which serves
- * bundled data items that arweave.net can't resolve.
+ * Resolve audio URI. Uses arweave.net as primary.
+ * Some bundled content is only on Irys — use `getAudioFallbackUrl`
+ * to get the alternate gateway URL when the primary fails.
  */
 export function resolveAudioUrl(uri: string): string {
   if (!uri) return "";
 
   if (uri.startsWith("ar://")) {
-    return resolveArweave(uri.slice(5), IRYS_GATEWAY);
+    return resolveArweave(uri.slice(5), ARWEAVE_GATEWAY);
   }
 
   if (uri.startsWith("ipfs://")) {
@@ -48,4 +49,20 @@ export function resolveAudioUrl(uri: string): string {
   }
 
   return uri;
+}
+
+/**
+ * Get the fallback audio URL for a given primary URL.
+ * Swaps between arweave.net and Irys gateways.
+ */
+export function getAudioFallbackUrl(url: string): string | null {
+  if (url.includes(ARWEAVE_GATEWAY)) {
+    const id = url.split(ARWEAVE_GATEWAY + "/")[1];
+    return id ? resolveArweave(id, IRYS_GATEWAY) : null;
+  }
+  if (url.includes(IRYS_GATEWAY)) {
+    const id = url.split(IRYS_GATEWAY + "/")[1];
+    return id ? resolveArweave(id, ARWEAVE_GATEWAY) : null;
+  }
+  return null;
 }

@@ -1,12 +1,14 @@
 import { API_BASE } from "./consts";
 import type { TimelineResponse } from "@/types/timeline";
 import type { TokenMetadata } from "@/types/metadata";
+import type { Comment } from "@/types/audio";
 
 export async function fetchTimeline(
   page: number = 1,
   limit: number = 50,
   artist?: string,
-  collection?: string
+  collection?: string,
+  { audioOnly = false, hidden }: { audioOnly?: boolean; hidden?: boolean } = {}
 ): Promise<TimelineResponse> {
   const params = new URLSearchParams({
     page: String(page),
@@ -14,9 +16,62 @@ export async function fetchTimeline(
   });
   if (artist) params.set("artist", artist);
   if (collection) params.set("collection", collection);
+  if (audioOnly) params.set("audioOnly", "true");
+  if (hidden !== undefined) params.set("hidden", String(hidden));
 
   const res = await fetch(`${API_BASE}/timeline?${params}`);
   if (!res.ok) throw new Error(`Timeline fetch failed: ${res.status}`);
+  return res.json();
+}
+
+export async function collectMoment({
+  collectionAddress,
+  tokenId,
+  chainId = 8453,
+  amount,
+  comment,
+  token,
+}: {
+  collectionAddress: string;
+  tokenId: string;
+  chainId?: number;
+  amount: number;
+  comment: string;
+  token: string;
+}): Promise<{ hash: string; chainId: number }> {
+  const res = await fetch("/api/collect", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      moment: { collectionAddress, tokenId, chainId },
+      amount,
+      comment,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ message: "Collect failed" }));
+    throw new Error(err.message ?? "Collect failed");
+  }
+  return res.json();
+}
+
+export async function fetchComments(
+  collectionAddress: string,
+  tokenId: string,
+  chainId: number = 8453,
+  offset: number = 0
+): Promise<{ comments: Comment[] }> {
+  const params = new URLSearchParams({
+    collectionAddress,
+    tokenId,
+    chainId: String(chainId),
+    offset: String(offset),
+  });
+  const res = await fetch(`${API_BASE}/moment/comments?${params}`);
+  if (!res.ok) throw new Error(`Comments fetch failed: ${res.status}`);
   return res.json();
 }
 

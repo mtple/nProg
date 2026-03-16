@@ -23,7 +23,7 @@ export default function ArtistHeader({ address }: { address: string }) {
         </svg>
         Back
       </Link>
-      <h1 className="text-2xl font-bold text-zinc-50">{artistName}</h1>
+      <h1 className="font-serif text-2xl font-bold text-zinc-50">{artistName}</h1>
     </div>
   );
 }

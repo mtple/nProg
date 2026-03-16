@@ -4,18 +4,7 @@ import { useMemo } from "react";
 import { useTimeline } from "@/hooks/useTimeline";
 import TrackTile from "./TrackTile";
 import TrackRow from "./TrackRow";
-
-function SkeletonTile() {
-  return (
-    <div>
-      <div className="skeleton aspect-square rounded" />
-      <div className="mt-3 space-y-1.5">
-        <div className="skeleton h-4 w-3/4 rounded" />
-        <div className="skeleton h-3.5 w-1/2 rounded" />
-      </div>
-    </div>
-  );
-}
+import Scribble from "@/components/ui/Scribble";
 
 export default function FeedGrid({ artist }: { artist?: string }) {
   const { tracks, isLoading, isFetchingMore, hasMore, loadMore, error } =
@@ -52,10 +41,8 @@ export default function FeedGrid({ artist }: { artist?: string }) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <SkeletonTile key={i} />
-        ))}
+      <div className="flex items-center justify-center py-32">
+        <Scribble className="h-20 w-20 text-zinc-500" />
       </div>
     );
   }
