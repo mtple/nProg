@@ -8,12 +8,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { getAudioFallbackUrl } from "@/lib/resolveMediaUrl";
 import type { Track } from "@/types/audio";
 
 interface AudioContextValue {
   currentTrack: Track | null;
   isPlaying: boolean;
+  isBuffering: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -43,6 +43,7 @@ export default function AudioProvider({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(1);
@@ -51,15 +52,14 @@ export default function AudioProvider({
   // Use refs for values needed in event handlers to avoid stale closures
   const currentTrackRef = useRef<Track | null>(null);
   const queueRef = useRef<Track[]>([]);
-  const triedFallbackRef = useRef<Set<string>>(new Set());
   currentTrackRef.current = currentTrack;
   queueRef.current = queue;
 
   const playTrack = useCallback((track: Track) => {
     const audio = audioRef.current;
     if (!audio) return;
-    triedFallbackRef.current.clear();
     setCurrentTrack(track);
+    setIsBuffering(true);
     audio.src = track.audioUrl;
     audio.play().catch(() => {});
   }, []);
@@ -86,23 +86,16 @@ export default function AudioProvider({
     };
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onError = () => {
-      const currentSrc = audio.src;
-      if (!currentSrc || triedFallbackRef.current.has(currentSrc)) return;
-      triedFallbackRef.current.add(currentSrc);
-      const fallback = getAudioFallbackUrl(currentSrc);
-      if (fallback) {
-        audio.src = fallback;
-        audio.play().catch(() => {});
-      }
-    };
+    const onWaiting = () => setIsBuffering(true);
+    const onPlaying = () => setIsBuffering(false);
 
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("loadedmetadata", onLoadedMetadata);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
-    audio.addEventListener("error", onError);
+    audio.addEventListener("waiting", onWaiting);
+    audio.addEventListener("playing", onPlaying);
 
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
@@ -110,7 +103,8 @@ export default function AudioProvider({
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("error", onError);
+      audio.removeEventListener("waiting", onWaiting);
+      audio.removeEventListener("playing", onPlaying);
       audio.pause();
       audio.src = "";
     };
@@ -184,6 +178,7 @@ export default function AudioProvider({
       value={{
         currentTrack,
         isPlaying,
+        isBuffering,
         currentTime,
         duration,
         volume,

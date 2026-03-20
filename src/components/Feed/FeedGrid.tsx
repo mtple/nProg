@@ -2,16 +2,31 @@
 
 import { useMemo } from "react";
 import { useTimeline } from "@/hooks/useTimeline";
+import { useRecentlyCollected } from "@/hooks/useRecentlyCollected";
 import TrackTile from "./TrackTile";
 import TrackRow from "./TrackRow";
-import CollectionRow from "./CollectionRow";
-import type { Collection } from "./CollectionRow";
+import AlbumRow from "./AlbumRow";
+import type { Album } from "./AlbumRow";
 import ArtistMosaic from "./ArtistMosaic";
 import Scribble from "@/components/ui/Scribble";
 
 export default function FeedGrid({ artist, collection }: { artist?: string; collection?: string }) {
   const { tracks, isLoading, isFetchingMore, hasMore, loadMore, error } =
     useTimeline(artist, collection);
+
+  // Build address→username lookup from timeline tracks
+  const artistNames = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const track of tracks) {
+      const key = track.artistAddress.toLowerCase();
+      if (!map.has(key) && track.artist !== track.artistAddress) {
+        map.set(key, track.artist);
+      }
+    }
+    return map;
+  }, [tracks]);
+
+  const { tracks: collectedTracks } = useRecentlyCollected(artistNames);
 
   // Group tracks by artist (home page only)
   const artistGroups = useMemo(() => {
@@ -28,8 +43,8 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     return Array.from(groups.values());
   }, [tracks, artist, collection]);
 
-  // Derive collections from audio tracks (home page only)
-  const collections = useMemo(() => {
+  // Derive albums from audio tracks (home page only)
+  const albums = useMemo(() => {
     if (artist || collection) return null;
 
     const groups = new Map<string, { tracks: typeof tracks }>();
@@ -41,7 +56,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
       groups.get(key)!.tracks.push(track);
     }
 
-    const result: Collection[] = [];
+    const result: Album[] = [];
     for (const [addr, group] of groups) {
       if (group.tracks.length < 2) continue;
       const first = group.tracks[0];
@@ -122,8 +137,16 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
         allTracks={tracks}
       />
 
-      {collections && collections.length > 0 && (
-        <CollectionRow collections={collections} />
+      {collectedTracks.length > 0 && !artist && !collection && (
+        <TrackRow
+          title="Recently Collected"
+          tracks={collectedTracks}
+          allTracks={collectedTracks}
+        />
+      )}
+
+      {albums && albums.length > 0 && (
+        <AlbumRow albums={albums} />
       )}
 
       {artistGroups && artistGroups.length > 0 && (

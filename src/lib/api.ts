@@ -75,6 +75,56 @@ export async function fetchComments(
   return res.json();
 }
 
+export interface PaymentMoment {
+  id: string;
+  token_id: number;
+  uri: string;
+  collection: {
+    address: string;
+    chain_id: number;
+    creator: string;
+  };
+  metadata: {
+    name: string;
+    image: string;
+    description?: string;
+    content?: { uri: string; mime: string };
+    animation_url?: string;
+    external_url?: string;
+  };
+}
+
+export interface Payment {
+  id: string;
+  amount: string;
+  transferred_at: string;
+  moment: PaymentMoment;
+  buyer: { address: string; username: string | null };
+}
+
+export interface PaymentsResponse {
+  status: string;
+  payments: Payment[];
+  pagination: { total_count: number; page: number; limit: number; total_pages: number };
+}
+
+export async function fetchPayments(
+  collector: string,
+  page: number = 1,
+  limit: number = 20,
+): Promise<PaymentsResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    audioOnly: "true",
+    collector,
+    chainId: "8453",
+  });
+  const res = await fetch(`${API_BASE}/payments?${params}`);
+  if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function fetchMetadata(
   uri: string
 ): Promise<TokenMetadata | null> {

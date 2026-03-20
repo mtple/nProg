@@ -15,7 +15,7 @@ export default function TrackTile({
   track: Track;
   queue: Track[];
 }) {
-  const { play, currentTrack, isPlaying, toggle } = useAudio();
+  const { play, currentTrack, isPlaying, isBuffering, toggle } = useAudio();
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
   const imageLoaded = loadedSrc === track.artworkUrl;
 
@@ -71,14 +71,21 @@ export default function TrackTile({
           >
             <div
               className={`relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
-                isCurrentTrack && isPlaying
-                  ? "scale-100 opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.25)] animate-pulse-slow"
-                  : isCurrentTrack
-                    ? "scale-100 opacity-100 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
-                    : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                isCurrentTrack && isBuffering
+                  ? "scale-100 opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.25)]"
+                  : isCurrentTrack && isPlaying
+                    ? "scale-100 opacity-100 shadow-[0_0_20px_rgba(255,255,255,0.25)] animate-pulse-slow"
+                    : isCurrentTrack
+                      ? "scale-100 opacity-100 shadow-[0_0_15px_rgba(255,255,255,0.15)]"
+                      : "scale-90 opacity-0 group-hover:scale-100 group-hover:opacity-100 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.15)]"
               }`}
             >
-              {isCurrentTrack && isPlaying ? (
+              {isCurrentTrack && isBuffering ? (
+                <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : isCurrentTrack && isPlaying ? (
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                 </svg>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import Scribble from "@/components/ui/Scribble";
 import type { Track } from "@/types/audio";
 
-export interface Collection {
+export interface Album {
   address: string;
   name: string;
   artist: string;
@@ -14,16 +14,16 @@ export interface Collection {
   trackCount: number;
 }
 
-function CollectionCard({ collection }: { collection: Collection }) {
+function AlbumCard({ album }: { album: Album }) {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <Link
-      href={`/collection/${collection.address}`}
+      href={`/collection/${album.address}`}
       className="group block w-40 flex-shrink-0 sm:w-48"
     >
       <div className="relative aspect-square overflow-hidden rounded bg-zinc-900">
-        {collection.artworkUrl ? (
+        {album.artworkUrl ? (
           <>
             {!imageLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
@@ -31,8 +31,8 @@ function CollectionCard({ collection }: { collection: Collection }) {
               </div>
             )}
             <Image
-              src={collection.artworkUrl}
-              alt={collection.name}
+              src={album.artworkUrl}
+              alt={album.name}
               fill
               className={`object-cover transition-all duration-300 group-hover:scale-[1.03] group-hover:brightness-75 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
@@ -50,20 +50,20 @@ function CollectionCard({ collection }: { collection: Collection }) {
       </div>
       <div className="mt-2.5">
         <p className="truncate text-[13px] font-medium leading-tight text-zinc-100">
-          {collection.name}
+          {album.name}
         </p>
         <p className="mt-0.5 truncate text-[13px] leading-tight text-zinc-500">
-          {collection.artist} &middot; {collection.trackCount} {collection.trackCount === 1 ? "track" : "tracks"}
+          {album.artist} &middot; {album.trackCount} {album.trackCount === 1 ? "track" : "tracks"}
         </p>
       </div>
     </Link>
   );
 }
 
-export default function CollectionRow({
-  collections,
+export default function AlbumRow({
+  albums,
 }: {
-  collections: Collection[];
+  albums: Album[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -77,12 +77,12 @@ export default function CollectionRow({
     });
   };
 
-  if (collections.length === 0) return null;
+  if (albums.length === 0) return null;
 
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-serif text-lg font-semibold text-zinc-50">Collections</h2>
+        <h2 className="font-serif text-lg font-semibold text-zinc-50">Albums</h2>
         <div className="flex gap-1">
           <button
             onClick={() => scroll("left")}
@@ -109,8 +109,8 @@ export default function CollectionRow({
         ref={scrollRef}
         className="scrollbar-hide flex gap-4 overflow-x-auto scroll-smooth pb-2"
       >
-        {collections.map((c) => (
-          <CollectionCard key={c.address} collection={c} />
+        {albums.map((c) => (
+          <AlbumCard key={c.address} album={c} />
         ))}
       </div>
     </section>

@@ -1,0 +1,66 @@
+# In•Process Documentation
+
+## Docs
+
+- [Get Airdrops](https://docs.inprocess.world/api-reference/airdrops/index.md): Retrieve Artist airdrop information on the In•Process protocol. This endpoint returns a list of airdrops for a specific artist address, including collection addresses, token IDs, recipients, and amounts.
+- [Create an Artist API Key](https://docs.inprocess.world/api-reference/artists/api-keys/create.md): Create a new API key for artists on the In•Process protocol.
+- [Connect a Phone Number](https://docs.inprocess.world/api-reference/artists/phones/connect.md): Connect a phone number for artists on the In•Process protocol. After connection, a verification SMS message will be sent to the provided phone number.
+- [Disconnect a Phone Number](https://docs.inprocess.world/api-reference/artists/phones/disconnect.md): Disconnect a phone number from an artist's profile on the In•Process protocol. This will remove the phone number association and disable SMS-based features for that number.
+- [Connect a Social Wallet](https://docs.inprocess.world/api-reference/artists/wallets/connect.md): Connect a social wallet and an artist wallet on the In•Process protocol.
+- [Disconnect a Social Wallet](https://docs.inprocess.world/api-reference/artists/wallets/disconnect.md): Disconnect a social wallet and an artist wallet on the In•Process protocol.
+- [Get an Artist Wallet](https://docs.inprocess.world/api-reference/artists/wallets/get.md): Get an artist wallet associated with a social wallet on the In•Process protocol.
+- [Get Metadata](https://docs.inprocess.world/api-reference/arweave/metadata.md): Proxy requests to fetch JSON metadata from IPFS or Arweave URIs.
+- [Get Arweave Content](https://docs.inprocess.world/api-reference/arweave/proxy.md): Proxy requests to retrieve content from the Arweave gateway.
+- [Upload to Arweave](https://docs.inprocess.world/api-reference/arweave/upload.md): Proxy upload requests to store media content on Arweave permanent storage.
+- [Collect a Catalog Moment](https://docs.inprocess.world/api-reference/catalog/collect.md): Collect a Catalog Moment using USDC via the artist's smart wallet. This endpoint reads the token price from the collection contract, verifies USDC balance, approves spending if needed, and executes a `purchaseTokenWithValue` transaction onchain.
+- [Browsing the Collections](https://docs.inprocess.world/api-reference/collections/browse.md): Browse collections from the In•Process protocol. This endpoint can retrieve collections from a specific artist or browse the in•process collective collections, depending on whether the `artist` parameter is provided. Supports pagination for efficient browsing.
+- [Create a Collection](https://docs.inprocess.world/api-reference/collections/create.md): Create a new Collection on the In•Process protocol. This endpoint allows artists to create a new collection contract onchain.
+- [Get Collection Info](https://docs.inprocess.world/api-reference/collections/info.md): Retrieve detailed information about a Collection on the In•Process protocol, including collection metadata, creator, admins, and timestamps.
+- [Update Collection Metadata](https://docs.inprocess.world/api-reference/collections/update-uri.md): Update the metadata (name and URI) of an existing Collection on the In•Process protocol. This endpoint allows artists to update the collection name and metadata URI associated with their Collections.
+- [Get Emails](https://docs.inprocess.world/api-reference/emails/get.md): Retrieve email addresses for artists on the In•Process protocol.
+- [Introduction](https://docs.inprocess.world/api-reference/introduction.md): API documentation for the In•Process platform
+- [Proxy Image](https://docs.inprocess.world/api-reference/media/image.md): Proxy and transform images from decentralized storage protocols like Arweave and IPFS. This endpoint fetches images from `ar://`, `ipfs://`, or `https://` URLs and optionally resizes and converts them to a target format.
+- [Stream Media](https://docs.inprocess.world/api-reference/media/stream.md): Stream audio or video content from decentralized storage protocols like Arweave and IPFS. This endpoint acts as a proxy that handles decentralized storage protocols and enables partial content streaming for media players.
+- [Get Messages](https://docs.inprocess.world/api-reference/messages/get.md): Retrieve messages with pagination support. When a messageId is provided, returns a single message. Otherwise, returns messages associated with the authenticated artist's address. Admin addresses have access to all messages.
+- [Index Message Moment](https://docs.inprocess.world/api-reference/messages/index-moment.md): Index a message by linking it to its associated moment. This endpoint extracts moment information (collection address and token ID) from the message and creates a message-moment association.
+- [Add Admin to a Moment](https://docs.inprocess.world/api-reference/moment/add-permission.md): Add admin permissions to a Moment on the In•Process protocol. This endpoint allows artists to grant admin permissions to other addresses for managing their Moments.
+- [Airdrop a Moment](https://docs.inprocess.world/api-reference/moment/airdrop.md): Airdrop a Moment on the In•Process protocol. This endpoint allows artists to distribute moments to multiple recipients.
+- [Collect a Moment](https://docs.inprocess.world/api-reference/moment/collect.md): Collect a Moment on the In•Process protocol. This endpoint allows users to collect moments with an optional comment.
+- [Get Collectors](https://docs.inprocess.world/api-reference/moment/collectors.md): Retrieve collectors of a Moment on the In•Process protocol. This endpoint returns a list of addresses that have collected a specific moment, along with collection details.
+- [Get Comments](https://docs.inprocess.world/api-reference/moment/comments.md): Retrieve Moment comments on the In•Process protocol. This endpoint returns comments associated with a specific moment.
+- [Create a Moment](https://docs.inprocess.world/api-reference/moment/create.md): Create a new Moment on the In•Process protocol. No signature is required for this endpoint.
+- [Get Moment Info](https://docs.inprocess.world/api-reference/moment/get.md): Retrieve detailed information about a Moment on the In•Process protocol, including onchain moment data, sales configuration, metadata, and moment admins.
+- [Migrate Moments](https://docs.inprocess.world/api-reference/moment/migrate.md): Migrate moments from social wallets to the artist's wallet. This endpoint finds all social wallets associated with the authenticated artist, retrieves collections from those social wallets, and migrates the moments to the artist's wallet.
+- [Remove Admin from a Moment](https://docs.inprocess.world/api-reference/moment/remove-permission.md): Remove admin permissions from a Moment on the In•Process protocol. This endpoint allows artists to revoke admin permissions from addresses that were previously granted admin access to their Moments.
+- [Set Sale](https://docs.inprocess.world/api-reference/moment/sale.md): Update the sale configuration for a Moment on the In•Process protocol. This endpoint allows artists to update the price, sale window, token limit per address, and funds recipient for a Moment's sale.
+- [Create a Moment](https://docs.inprocess.world/api-reference/moment/simulate.md): Simulate a moment creation without submitting an on-chain transaction. Useful for validating inputs and estimating gas before committing.
+- [Update Moment URI](https://docs.inprocess.world/api-reference/moment/update-uri.md): Update the URI (metadata) of an existing Moment on the In•Process protocol. This endpoint allows artists to update the metadata URI associated with their Moments.
+- [Create a Writing Moment](https://docs.inprocess.world/api-reference/moment/writing.md): Create a new Writing Moment on the In•Process protocol. No signature is required for this endpoint.
+- [Browsing Notifications](https://docs.inprocess.world/api-reference/notifications/index.md): Retrieve notification records from the In•Process protocol. Supports filtering by artist address and viewed status.
+- [Login with OTP](https://docs.inprocess.world/api-reference/oauth/login.md): Authenticate an account using an email address and a one-time verification code (OTP).
+- [Send Code](https://docs.inprocess.world/api-reference/oauth/send-code.md): Send a one-time verification code to the provided email address for email-based OAuth login.
+- [Distribute Payment](https://docs.inprocess.world/api-reference/payments/distribute.md): Distribute payments from a split contract. This endpoint allows you to trigger the distribution of payment tokens (native or ERC20) from a split contract to its recipients according to their configured allocations.
+- [Browse Payments](https://docs.inprocess.world/api-reference/payments/index.md): Retrieve payment records from the In•Process protocol. Supports filtering by artist, collector, chain, and media type. Supports pagination for efficient browsing.
+- [Balances of social smart wallets](https://docs.inprocess.world/api-reference/smartwallet/balances.md): Get balances of all social smart wallets associated with an artist address. Returns ETH and USDC balances for each social smart wallet, along with total balances across all wallets.
+- [Get Smart Wallet](https://docs.inprocess.world/api-reference/smartwallet/get.md): Get a smart wallet connected to an artist wallet on the In•Process protocol. This endpoint retrieves the smart wallet address associated with a given artist wallet address.
+- [Withdraw from social smart wallets](https://docs.inprocess.world/api-reference/smartwallet/withdraw.md): Withdraw funds from a smart wallet. Supports both native ETH and USDC tokens. If amount is not provided, the full balance will be withdrawn. The withdrawal may span multiple smart wallets associated with the artist.
+- [Browsing the Timelines](https://docs.inprocess.world/api-reference/timeline/index.md): Browse moments from timelines. This endpoint can retrieve moments from a specific artist's timeline or browse the in•process collective timeline, depending on whether the `artist` parameter is provided. Supports pagination for efficient browsing.
+- [Upload Files to Arweave](https://docs.inprocess.world/arweave/upload-to-arweave.md)
+- [Create a Collection](https://docs.inprocess.world/coinbase-sdk/create-collection.md)
+- [SalesConfig Reference](https://docs.inprocess.world/configuration/sales-config.md)
+- [Splits Configuration Reference](https://docs.inprocess.world/configuration/splits.md)
+- [In•Process API Documentation](https://docs.inprocess.world/index.md)
+- [Sign in with In•Process](https://docs.inprocess.world/oauth/login-with-otp.md)
+- [Protocol Deployments](https://docs.inprocess.world/protocol/protocol-deployments.md)
+- [Setup Actions](https://docs.inprocess.world/protocol/setup-actions.md)
+
+## OpenAPI Specs
+
+- [openapi](https://docs.inprocess.world/api-reference/openapi.json)
+
+## Optional
+
+- [In•Process App](https://inprocess.world)
+
+
+Built with [Mintlify](https://mintlify.com).

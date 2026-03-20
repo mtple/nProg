@@ -1,68 +1,24 @@
-const ARWEAVE_GATEWAY = "https://arweave.net";
-const IRYS_GATEWAY = "https://node2.irys.xyz";
-const IPFS_GATEWAY = "https://nftstorage.link/ipfs";
-
-function resolveArweave(id: string, gateway: string): string {
-  return `${gateway}/${id}`;
-}
+import { API_BASE } from "./consts";
 
 /**
- * Resolve media URI to an HTTP URL.
- * Default uses arweave.net (works for images).
+ * Resolve media URI to an image URL via the InProcess API image proxy.
+ * Supports ar://, ipfs://, and https:// URIs with optional resizing/format conversion.
  */
-export function resolveMediaUrl(uri: string): string {
+export function resolveMediaUrl(uri: string, opts?: { w?: number; h?: number; f?: string; q?: number }): string {
   if (!uri) return "";
-
-  if (uri.startsWith("ar://")) {
-    return resolveArweave(uri.slice(5), ARWEAVE_GATEWAY);
-  }
-
-  if (uri.startsWith("ipfs://")) {
-    return `${IPFS_GATEWAY}/${uri.slice(7)}`;
-  }
-
-  if (uri.startsWith("https://") || uri.startsWith("http://")) {
-    return uri;
-  }
-
-  return uri;
+  const params = new URLSearchParams({ url: uri });
+  if (opts?.w) params.set("w", String(opts.w));
+  if (opts?.h) params.set("h", String(opts.h));
+  if (opts?.f) params.set("f", opts.f);
+  if (opts?.q) params.set("q", String(opts.q));
+  return `${API_BASE}/media/image?${params}`;
 }
 
 /**
- * Resolve audio URI. Uses arweave.net as primary.
- * Some bundled content is only on Irys — use `getAudioFallbackUrl`
- * to get the alternate gateway URL when the primary fails.
+ * Resolve audio URI via the InProcess API streaming endpoint.
+ * Supports ar://, ipfs://, and https:// URIs with range request support.
  */
 export function resolveAudioUrl(uri: string): string {
   if (!uri) return "";
-
-  if (uri.startsWith("ar://")) {
-    return resolveArweave(uri.slice(5), ARWEAVE_GATEWAY);
-  }
-
-  if (uri.startsWith("ipfs://")) {
-    return `${IPFS_GATEWAY}/${uri.slice(7)}`;
-  }
-
-  if (uri.startsWith("https://") || uri.startsWith("http://")) {
-    return uri;
-  }
-
-  return uri;
-}
-
-/**
- * Get the fallback audio URL for a given primary URL.
- * Swaps between arweave.net and Irys gateways.
- */
-export function getAudioFallbackUrl(url: string): string | null {
-  if (url.includes(ARWEAVE_GATEWAY)) {
-    const id = url.split(ARWEAVE_GATEWAY + "/")[1];
-    return id ? resolveArweave(id, IRYS_GATEWAY) : null;
-  }
-  if (url.includes(IRYS_GATEWAY)) {
-    const id = url.split(IRYS_GATEWAY + "/")[1];
-    return id ? resolveArweave(id, ARWEAVE_GATEWAY) : null;
-  }
-  return null;
+  return `${API_BASE}/media/stream?url=${encodeURIComponent(uri)}`;
 }

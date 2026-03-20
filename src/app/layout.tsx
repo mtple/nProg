@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/QueryProvider";
@@ -41,7 +42,19 @@ export default function RootLayout({
           <AuthProvider>
             <AudioProvider>
               <Header />
-              <main className="pb-24">{children}</main>
+              <main className="pb-24">
+                {children}
+                <div className="mx-auto w-full max-w-6xl px-4 py-16">
+                  <Image
+                    src="/logo.png"
+                    alt="nProg"
+                    width={1200}
+                    height={1200}
+                    className="w-full opacity-40"
+                    priority={false}
+                  />
+                </div>
+              </main>
               <AudioPlayer />
             </AudioProvider>
           </AuthProvider>

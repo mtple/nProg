@@ -14,7 +14,7 @@ import type { Track } from "@/types/audio";
 
 export default function MomentDetail({ id }: { id: string }) {
   const { tracks } = useTimeline();
-  const { play, currentTrack, isPlaying, toggle } = useAudio();
+  const { play, currentTrack, isPlaying, isBuffering, toggle } = useAudio();
   const { token, isLoggedIn } = useAuth();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [collecting, setCollecting] = useState(false);
@@ -110,7 +110,15 @@ export default function MomentDetail({ id }: { id: string }) {
                   : "border-white/10 bg-white/5 text-white backdrop-blur-md hover:border-white/25 hover:bg-white/10 hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]"
               }`}
             >
-              {isCurrentTrack && isPlaying ? (
+              {isCurrentTrack && isBuffering ? (
+                <>
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Loading
+                </>
+              ) : isCurrentTrack && isPlaying ? (
                 <>
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />

@@ -106,7 +106,8 @@ export default function ArtistMosaic({
   const layout = layoutRef.current;
 
   return (
-    <div className="space-y-8">
+    <section className="space-y-8">
+      <h2 className="font-serif text-2xl font-bold text-zinc-50">Artists</h2>
       {layout.map((row, i) => {
         const leftGroup = groupMap.get(row.left.address);
         const rightGroup = row.right ? groupMap.get(row.right.address) : null;
@@ -157,6 +158,6 @@ export default function ArtistMosaic({
           </div>
         );
       })}
-    </div>
+    </section>
   );
 }

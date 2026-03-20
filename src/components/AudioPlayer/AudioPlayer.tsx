@@ -8,7 +8,7 @@ import SeekBar from "./SeekBar";
 import VolumeControl from "./VolumeControl";
 
 export default function AudioPlayer() {
-  const { currentTrack, isPlaying, toggle, next, previous } = useAudio();
+  const { currentTrack, isPlaying, isBuffering, toggle, next, previous } = useAudio();
 
   if (!currentTrack) return null;
 
@@ -69,7 +69,12 @@ export default function AudioPlayer() {
               className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-50 text-zinc-900 transition-transform hover:scale-105"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? (
+              {isBuffering ? (
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : isPlaying ? (
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                 </svg>
