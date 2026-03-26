@@ -11,7 +11,7 @@ html {
 }
 
 body {
-  background: #09090b;
+  background: #131112;
   color: #fafafa;
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
@@ -95,4 +95,28 @@ input[type="range"]::-moz-range-thumb {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Now-playing equalizer bars */
+@keyframes now-playing-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+@keyframes now-playing-2 {
+  0%, 100% { height: 8px; }
+  50% { height: 4px; }
+}
+@keyframes now-playing-3 {
+  0%, 100% { height: 6px; }
+  50% { height: 12px; }
+}
+
+.animate-now-playing-1 {
+  animation: now-playing-1 0.8s ease-in-out infinite;
+}
+.animate-now-playing-2 {
+  animation: now-playing-2 0.7s ease-in-out infinite;
+}
+.animate-now-playing-3 {
+  animation: now-playing-3 0.9s ease-in-out infinite;
 }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useAudio } from "@/providers/AudioProvider";
-import { truncateAddress } from "@/lib/utils";
+import { formatArtistName } from "@/lib/utils";
 import SeekBar from "./SeekBar";
 import VolumeControl from "./VolumeControl";
 
@@ -12,10 +12,7 @@ export default function AudioPlayer() {
 
   if (!currentTrack) return null;
 
-  const displayArtist =
-    currentTrack.artist.length > 20
-      ? truncateAddress(currentTrack.artist)
-      : currentTrack.artist;
+  const displayArtist = formatArtistName(currentTrack.artist);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-900/95 backdrop-blur-sm">

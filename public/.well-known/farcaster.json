@@ -1,0 +1,21 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "nProg",
+    "iconUrl": "/favicon-96x96.png",
+    "homeUrl": "/",
+    "description": "The sounds of In Process",
+    "imageUrl": "/embed.png",
+    "buttonTitle": "Listen Now",
+    "splashImageUrl": "/favicon-96x96.png",
+    "splashBackgroundColor": "#131112",
+    "subtitle": "Music from the InProcess timeline",
+    "primaryCategory": "entertainment",
+    "tags": ["music", "web3", "nft", "inprocess"]
+  }
+}

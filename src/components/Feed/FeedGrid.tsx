@@ -130,7 +130,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
 
   // Home page: Latest → Collections → Artist mosaic
   return (
-    <div className="space-y-10">
+    <div className="space-y-7">
       <TrackRow
         title="Latest"
         tracks={tracks}

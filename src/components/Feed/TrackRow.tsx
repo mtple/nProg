@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import TrackTile from "./TrackTile";
+import { useScrollArrows } from "@/hooks/useScrollArrows";
 import type { Track } from "@/types/audio";
 
 interface TrackRowProps {
@@ -18,17 +18,7 @@ export default function TrackRow({
   allTracks,
   artistAddress,
 }: TrackRowProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.75;
-    el.scrollBy({
-      left: direction === "right" ? amount : -amount,
-      behavior: "smooth",
-    });
-  };
+  const { scrollRef, canScrollLeft, canScrollRight, scroll } = useScrollArrows();
 
   return (
     <section>
@@ -48,7 +38,8 @@ export default function TrackRow({
         <div className="flex gap-1">
           <button
             onClick={() => scroll("left")}
-            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            disabled={!canScrollLeft}
+            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
             aria-label="Scroll left"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -57,7 +48,8 @@ export default function TrackRow({
           </button>
           <button
             onClick={() => scroll("right")}
-            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            disabled={!canScrollRight}
+            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
             aria-label="Scroll right"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

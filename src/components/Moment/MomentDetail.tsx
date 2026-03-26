@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAudio } from "@/providers/AudioProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useTimeline } from "@/hooks/useTimeline";
 import { collectMoment } from "@/lib/api";
-import { truncateAddress, formatDate } from "@/lib/utils";
+import { formatArtistName, formatDate } from "@/lib/utils";
 import Scribble from "@/components/ui/Scribble";
 import CommentSection from "@/components/Moment/CommentSection";
+import TrackTile from "@/components/Feed/TrackTile";
 import type { Track } from "@/types/audio";
 
 export default function MomentDetail({ id }: { id: string }) {
@@ -23,6 +24,17 @@ export default function MomentDetail({ id }: { id: string }) {
 
   const track = tracks.find((t: Track) => t.id === id);
 
+  const relatedTracks = useMemo(() => {
+    if (!track) return [];
+    return tracks
+      .filter(
+        (t) =>
+          t.artistAddress.toLowerCase() === track.artistAddress.toLowerCase() &&
+          t.id !== track.id
+      )
+      .slice(0, 5);
+  }, [tracks, track]);
+
   if (!track) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -32,8 +44,7 @@ export default function MomentDetail({ id }: { id: string }) {
   }
 
   const isCurrentTrack = currentTrack?.id === track.id;
-  const displayArtist =
-    track.artist.length > 20 ? truncateAddress(track.artist) : track.artist;
+  const displayArtist = formatArtistName(track.artist);
 
   const handlePlay = () => {
     if (isCurrentTrack) {
@@ -47,7 +58,7 @@ export default function MomentDetail({ id }: { id: string }) {
     <div>
       <Link
         href="/"
-        className="mb-8 inline-flex items-center gap-1 text-sm text-zinc-400 transition-colors hover:text-zinc-50"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-zinc-400 transition-colors hover:text-zinc-50"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -55,7 +66,7 @@ export default function MomentDetail({ id }: { id: string }) {
         Back
       </Link>
 
-      <div className="flex flex-col gap-8 md:flex-row md:gap-12">
+      <div className="flex flex-col gap-6 md:flex-row md:gap-10">
         {/* Artwork */}
         <div className="w-full flex-shrink-0 md:w-80 lg:w-96">
           <div className="relative aspect-square overflow-hidden rounded-lg bg-zinc-900">
@@ -88,14 +99,14 @@ export default function MomentDetail({ id }: { id: string }) {
         </div>
 
         {/* Info */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <div>
             <h1 className="font-serif text-2xl font-bold text-zinc-50 md:text-3xl">
               {track.title}
             </h1>
             <Link
               href={`/artist/${track.artistAddress}`}
-              className="mt-1 font-serif text-lg italic text-zinc-400 transition-colors hover:text-zinc-50"
+              className="mt-1 inline-block font-serif text-lg italic text-zinc-400 transition-colors hover:text-zinc-50"
             >
               {displayArtist}
             </Link>
@@ -199,6 +210,26 @@ export default function MomentDetail({ id }: { id: string }) {
           <p className="text-sm text-zinc-500">{formatDate(track.createdAt)}</p>
         </div>
       </div>
+
+      {/* Related tracks from same artist */}
+      {relatedTracks.length > 0 && (
+        <div className="mt-10">
+          <h2 className="mb-4 font-serif text-lg font-semibold text-zinc-50">
+            More from{" "}
+            <Link
+              href={`/artist/${track.artistAddress}`}
+              className="transition-colors hover:text-zinc-300"
+            >
+              {displayArtist}
+            </Link>
+          </h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {relatedTracks.map((t) => (
+              <TrackTile key={t.id} track={t} queue={tracks} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <CommentSection
         collectionAddress={track.address}

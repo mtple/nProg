@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Scribble from "@/components/ui/Scribble";
-import type { Track } from "@/types/audio";
+import { useScrollArrows } from "@/hooks/useScrollArrows";
 
 export interface Album {
   address: string;
@@ -47,12 +47,21 @@ function AlbumCard({ album }: { album: Album }) {
             <Scribble className="h-10 w-10 text-zinc-600" />
           </div>
         )}
+        {/* Hover overlay with track count */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/30">
+          <div className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-white opacity-0 backdrop-blur-md transition-all duration-300 group-hover:opacity-100">
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+            </svg>
+            <span className="text-xs font-medium">{album.trackCount}</span>
+          </div>
+        </div>
       </div>
       <div className="mt-2.5">
-        <p className="truncate text-[13px] font-medium leading-tight text-zinc-100">
+        <p className="truncate text-[13px] font-medium leading-tight text-zinc-100" title={album.name}>
           {album.name}
         </p>
-        <p className="mt-0.5 truncate text-[13px] leading-tight text-zinc-500">
+        <p className="mt-0.5 truncate text-[13px] leading-tight text-zinc-500" title={`${album.artist} · ${album.trackCount} tracks`}>
           {album.artist} &middot; {album.trackCount} {album.trackCount === 1 ? "track" : "tracks"}
         </p>
       </div>
@@ -65,17 +74,7 @@ export default function AlbumRow({
 }: {
   albums: Album[];
 }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.75;
-    el.scrollBy({
-      left: direction === "right" ? amount : -amount,
-      behavior: "smooth",
-    });
-  };
+  const { scrollRef, canScrollLeft, canScrollRight, scroll } = useScrollArrows();
 
   if (albums.length === 0) return null;
 
@@ -86,7 +85,8 @@ export default function AlbumRow({
         <div className="flex gap-1">
           <button
             onClick={() => scroll("left")}
-            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            disabled={!canScrollLeft}
+            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
             aria-label="Scroll left"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -95,7 +95,8 @@ export default function AlbumRow({
           </button>
           <button
             onClick={() => scroll("right")}
-            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            disabled={!canScrollRight}
+            className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
             aria-label="Scroll right"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

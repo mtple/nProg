@@ -3,6 +3,15 @@ export function truncateAddress(address: string): string {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+export function isHexAddress(value: string): boolean {
+  return /^0x[0-9a-fA-F]{40}$/.test(value);
+}
+
+export function formatArtistName(artist: string): string {
+  if (isHexAddress(artist)) return truncateAddress(artist);
+  return artist;
+}
+
 export function formatDuration(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) return "0:00";
   const mins = Math.floor(seconds / 60);

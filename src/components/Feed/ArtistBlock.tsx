@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import TrackTile from "./TrackTile";
+import { useScrollArrows } from "@/hooks/useScrollArrows";
 import type { Track } from "@/types/audio";
 
 interface ArtistBlockProps {
@@ -18,17 +18,7 @@ export default function ArtistBlock({
   tracks,
   allTracks,
 }: ArtistBlockProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const amount = el.clientWidth * 0.6;
-    el.scrollBy({
-      left: direction === "right" ? amount : -amount,
-      behavior: "smooth",
-    });
-  };
+  const { scrollRef, canScrollLeft, canScrollRight, scroll } = useScrollArrows();
 
   return (
     <div className="min-w-0">
@@ -42,8 +32,9 @@ export default function ArtistBlock({
         {tracks.length > 1 && (
           <div className="flex gap-0.5 flex-shrink-0 ml-2">
             <button
-              onClick={() => scroll("left")}
-              className="rounded-full p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              onClick={() => scroll("left", 0.6)}
+              disabled={!canScrollLeft}
+              className="rounded-full p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
               aria-label="Scroll left"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -51,8 +42,9 @@ export default function ArtistBlock({
               </svg>
             </button>
             <button
-              onClick={() => scroll("right")}
-              className="rounded-full p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              onClick={() => scroll("right", 0.6)}
+              disabled={!canScrollRight}
+              className="rounded-full p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30 disabled:pointer-events-none"
               aria-label="Scroll right"
             >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
