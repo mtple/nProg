@@ -49,11 +49,16 @@ async function fetchUserAddress(token: string): Promise<string> {
 export function useMyCollection() {
   const { token, isLoggedIn } = useAuth();
 
-  const { data: userAddress } = useQuery({
+  const {
+    data: userAddress,
+    isLoading: isLoadingAddress,
+    error: addressError,
+  } = useQuery({
     queryKey: ["userAddress", token],
     queryFn: () => fetchUserAddress(token!),
     enabled: isLoggedIn && !!token,
     staleTime: 30 * 60 * 1000,
+    retry: 1,
   });
 
   const {
@@ -97,11 +102,11 @@ export function useMyCollection() {
   return {
     tracks,
     totalCount,
-    isLoading: !userAddress || isLoadingPayments,
+    isLoading: isLoadingAddress || (!!userAddress && isLoadingPayments),
     isFetchingMore: isFetchingNextPage,
     hasMore: !!hasNextPage,
     loadMore: fetchNextPage,
-    error: paymentsError,
+    error: addressError || paymentsError,
     isLoggedIn,
   };
 }

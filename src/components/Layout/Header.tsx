@@ -144,14 +144,14 @@ export default function Header() {
 
           <div className="relative">
             {isLoggedIn ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Link
                   href="/my-collection"
                   className="text-sm text-zinc-400 transition-colors hover:text-zinc-50"
                 >
-                  My Collection
+                  Collection
                 </Link>
-                <span className="text-sm text-zinc-400">{email}</span>
+                <span className="hidden text-sm text-zinc-400 sm:inline">{email}</span>
                 <button
                   onClick={logout}
                   className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
