@@ -190,7 +190,7 @@ export function useTimeline(artist?: string, collection?: string) {
       const timelineResults = await Promise.allSettled(
         pageNumbers.map((p) =>
           fetchTimeline(p, TIMELINE_PAGE_SIZE, artist, collection, {
-            audioOnly: true,
+            contentType: "audio",
             hidden: false,
           })
         )

@@ -21,9 +21,13 @@ export function useScrollArrows() {
     el.addEventListener("scroll", update, { passive: true });
     const ro = new ResizeObserver(update);
     ro.observe(el);
+    // Watch for children being added/removed (async-loaded items)
+    const mo = new MutationObserver(update);
+    mo.observe(el, { childList: true });
     return () => {
       el.removeEventListener("scroll", update);
       ro.disconnect();
+      mo.disconnect();
     };
   }, [update]);
 
