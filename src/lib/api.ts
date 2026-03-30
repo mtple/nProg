@@ -116,7 +116,7 @@ export async function fetchPayments(
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    content_type: "audio",
+    audioOnly: "true",
     collector,
     chainId: "8453",
   });
