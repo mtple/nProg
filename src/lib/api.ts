@@ -8,7 +8,7 @@ export async function fetchTimeline(
   limit: number = 50,
   artist?: string,
   collection?: string,
-  { audioOnly = false, hidden }: { audioOnly?: boolean; hidden?: boolean } = {}
+  { contentType, hidden }: { contentType?: string; hidden?: boolean } = {}
 ): Promise<TimelineResponse> {
   const params = new URLSearchParams({
     page: String(page),
@@ -16,7 +16,7 @@ export async function fetchTimeline(
   });
   if (artist) params.set("artist", artist);
   if (collection) params.set("collection", collection);
-  if (audioOnly) params.set("audioOnly", "true");
+  if (contentType) params.set("content_type", contentType);
   if (hidden !== undefined) params.set("hidden", String(hidden));
 
   const res = await fetch(`${API_BASE}/timeline?${params}`);
@@ -116,7 +116,7 @@ export async function fetchPayments(
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    audioOnly: "true",
+    content_type: "audio",
     collector,
     chainId: "8453",
   });
