@@ -145,6 +145,12 @@ export default function Header() {
           <div className="relative">
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
+                <Link
+                  href="/my-collection"
+                  className="text-sm text-zinc-400 transition-colors hover:text-zinc-50"
+                >
+                  My Collection
+                </Link>
                 <span className="text-sm text-zinc-400">{email}</span>
                 <button
                   onClick={logout}
