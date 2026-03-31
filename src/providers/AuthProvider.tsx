@@ -34,12 +34,26 @@ export default function AuthProvider({
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
 
-  // Hydrate from localStorage
+  // Hydrate from localStorage, clearing expired tokens
   useEffect(() => {
     const stored = localStorage.getItem("inp_token");
     const storedEmail = localStorage.getItem("inp_email");
-    if (stored) setToken(stored);
-    if (storedEmail) setEmail(storedEmail);
+    if (stored) {
+      try {
+        const payload = JSON.parse(atob(stored.split(".")[1]));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          localStorage.removeItem("inp_token");
+          localStorage.removeItem("inp_email");
+          return;
+        }
+      } catch {
+        localStorage.removeItem("inp_token");
+        localStorage.removeItem("inp_email");
+        return;
+      }
+      setToken(stored);
+      if (storedEmail) setEmail(storedEmail);
+    }
   }, []);
 
   const sendCode = useCallback(async (email: string) => {

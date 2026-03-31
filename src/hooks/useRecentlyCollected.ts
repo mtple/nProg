@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { fetchPayments } from "@/lib/api";
 import type { Payment } from "@/lib/api";
 import { resolveMediaUrl, resolveAudioUrl } from "@/lib/resolveMediaUrl";
-import { COLLECTOR_ADDRESS } from "@/lib/consts";
 import type { Track } from "@/types/audio";
 
 function paymentToTrack(payment: Payment, artistNames: Map<string, string>): Track | null {
@@ -38,8 +37,8 @@ function paymentToTrack(payment: Payment, artistNames: Map<string, string>): Tra
 
 export function useRecentlyCollected(artistNames: Map<string, string>) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["recentlyCollected", COLLECTOR_ADDRESS],
-    queryFn: () => fetchPayments(COLLECTOR_ADDRESS, 1, 20),
+    queryKey: ["recentlyCollected"],
+    queryFn: () => fetchPayments(undefined, 1, 20),
     staleTime: 5 * 60 * 1000,
   });
 

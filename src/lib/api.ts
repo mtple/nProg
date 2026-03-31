@@ -109,17 +109,17 @@ export interface PaymentsResponse {
 }
 
 export async function fetchPayments(
-  collector: string,
+  collector?: string,
   page: number = 1,
   limit: number = 20,
 ): Promise<PaymentsResponse> {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    audioOnly: "true",
-    collector,
+    content_type: "audio",
     chainId: "8453",
   });
+  if (collector) params.set("collector", collector);
   const res = await fetch(`${API_BASE}/payments?${params}`);
   if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
   return res.json();
