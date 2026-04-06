@@ -125,6 +125,33 @@ export async function fetchPayments(
   return res.json();
 }
 
+export interface Collector {
+  address: string;
+  username: string | null;
+  quantity: number;
+  collected_at: string;
+}
+
+export interface CollectorsResponse {
+  status: string;
+  collectors: Collector[];
+}
+
+export async function fetchCollectors(
+  collectionAddress: string,
+  tokenId: string,
+  chainId: number = 8453
+): Promise<CollectorsResponse> {
+  const params = new URLSearchParams({
+    collectionAddress,
+    tokenId,
+    chainId: String(chainId),
+  });
+  const res = await fetch(`${API_BASE}/moment/collectors?${params}`);
+  if (!res.ok) throw new Error(`Collectors fetch failed: ${res.status}`);
+  return res.json();
+}
+
 export async function fetchMetadata(
   uri: string
 ): Promise<TokenMetadata | null> {

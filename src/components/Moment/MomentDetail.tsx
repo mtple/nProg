@@ -9,6 +9,7 @@ import { useTimeline } from "@/hooks/useTimeline";
 import { collectMoment } from "@/lib/api";
 import { formatArtistName, formatDate } from "@/lib/utils";
 import Scribble from "@/components/ui/Scribble";
+import CollectedBy from "@/components/Moment/CollectedBy";
 import CommentSection from "@/components/Moment/CommentSection";
 import TrackTile from "@/components/Feed/TrackTile";
 import type { Track } from "@/types/audio";
@@ -210,6 +211,12 @@ export default function MomentDetail({ id }: { id: string }) {
           <p className="text-sm text-zinc-500">{formatDate(track.createdAt)}</p>
         </div>
       </div>
+
+      <CollectedBy
+        collectionAddress={track.address}
+        tokenId={track.tokenId}
+        chainId={track.chainId}
+      />
 
       {/* Related tracks from same artist */}
       {relatedTracks.length > 0 && (
