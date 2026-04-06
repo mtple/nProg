@@ -15,7 +15,10 @@ export default function AudioPlayer() {
   const displayArtist = formatArtistName(currentTrack.artist);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-900/95 backdrop-blur-sm">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-zinc-800 bg-zinc-900/95 backdrop-blur-sm"
+      style={{ paddingBottom: "var(--safe-area-bottom)" }}
+    >
       <div className="mx-auto max-w-6xl px-4">
         {/* Seek bar on top for mobile */}
         <div className="pt-2 md:hidden">

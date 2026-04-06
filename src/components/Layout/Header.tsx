@@ -136,7 +136,10 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm">
+      <header
+        className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-sm"
+        style={{ paddingTop: "var(--safe-area-top)" }}
+      >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <Link href="/" className="font-serif text-4xl font-black italic tracking-tight text-zinc-50">
             nProg

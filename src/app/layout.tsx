@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   other: {
-    "fc:frame": JSON.stringify({
+    "fc:miniapp": JSON.stringify({
       version: "1",
       imageUrl: "/embed.png",
       button: {
