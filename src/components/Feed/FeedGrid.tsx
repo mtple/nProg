@@ -151,8 +151,8 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
         />
       ) : null}
 
-      {!artist && !collection && !isLoading && (
-        isCollectedLoading ? (
+      {!artist && !collection && (
+        isCollectedLoading && !isLoading ? (
           <section>
             <h2 className="mb-3 font-serif text-lg font-semibold text-zinc-200">Recently Collected</h2>
             <div className="flex gap-4 overflow-hidden">
