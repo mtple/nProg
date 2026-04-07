@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchPayments } from "@/lib/api";
 import type { Payment } from "@/lib/api";
@@ -39,6 +39,7 @@ export function useRecentlyCollected() {
     queryKey: ["recentlyCollected"],
     queryFn: () => fetchPayments(undefined, 1, 20),
     staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 
   const tracks = useMemo(() => {
