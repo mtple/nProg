@@ -55,23 +55,17 @@ export default function AudioProvider({
   currentTrackRef.current = currentTrack;
   queueRef.current = queue;
 
-  const playTrack = useCallback((track: Track) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setCurrentTrack(track);
-    setIsBuffering(true);
-    audio.src = track.audioUrl;
-    audio.play().catch(() => {});
-  }, []);
+  // Lazily create the Audio element on first use
+  const getOrCreateAudio = useCallback(() => {
+    if (audioRef.current) return audioRef.current;
 
-  useEffect(() => {
     const audio = new Audio();
     audio.preload = "metadata";
     audioRef.current = audio;
 
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => setDuration(audio.duration);
-    const onEnded = () => {
+    audio.addEventListener("timeupdate", () => setCurrentTime(audio.currentTime));
+    audio.addEventListener("loadedmetadata", () => setDuration(audio.duration));
+    audio.addEventListener("ended", () => {
       setIsPlaying(false);
       const cur = currentTrackRef.current;
       const q = queueRef.current;
@@ -83,32 +77,33 @@ export default function AudioProvider({
         audio.src = nextTrack.audioUrl;
         audio.play().catch(() => {});
       }
-    };
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onWaiting = () => setIsBuffering(true);
-    const onPlaying = () => setIsBuffering(false);
+    });
+    audio.addEventListener("play", () => setIsPlaying(true));
+    audio.addEventListener("pause", () => setIsPlaying(false));
+    audio.addEventListener("waiting", () => setIsBuffering(true));
+    audio.addEventListener("playing", () => setIsBuffering(false));
 
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoadedMetadata);
-    audio.addEventListener("ended", onEnded);
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
-    audio.addEventListener("waiting", onWaiting);
-    audio.addEventListener("playing", onPlaying);
+    return audio;
+  }, []);
 
+  // Clean up audio element on unmount
+  useEffect(() => {
     return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoadedMetadata);
-      audio.removeEventListener("ended", onEnded);
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("waiting", onWaiting);
-      audio.removeEventListener("playing", onPlaying);
-      audio.pause();
-      audio.src = "";
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
     };
   }, []);
+
+  const playTrack = useCallback((track: Track) => {
+    const audio = getOrCreateAudio();
+    setCurrentTrack(track);
+    setIsBuffering(true);
+    audio.src = track.audioUrl;
+    audio.play().catch(() => {});
+  }, [getOrCreateAudio]);
 
   const play = useCallback(
     (track: Track, newQueue?: Track[]) => {

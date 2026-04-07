@@ -37,7 +37,6 @@ export default function ArtistHeader({ address }: { address: string }) {
               fill
               className="object-cover blur-3xl brightness-[0.3] saturate-150"
               sizes="100vw"
-              unoptimized
               aria-hidden
             />
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/40" />
@@ -52,7 +51,6 @@ export default function ArtistHeader({ address }: { address: string }) {
                 fill
                 className="object-cover"
                 sizes="112px"
-                unoptimized
               />
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useAudio } from "@/providers/AudioProvider";
@@ -9,10 +10,47 @@ import { useTimeline } from "@/hooks/useTimeline";
 import { collectMoment } from "@/lib/api";
 import { formatArtistName, formatDate } from "@/lib/utils";
 import Scribble from "@/components/ui/Scribble";
-import CollectedBy from "@/components/Moment/CollectedBy";
-import CommentSection from "@/components/Moment/CommentSection";
 import TrackTile from "@/components/Feed/TrackTile";
 import type { Track } from "@/types/audio";
+
+const CollectedBy = dynamic(
+  () => import("@/components/Moment/CollectedBy"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mt-6">
+        <h2 className="mb-3 font-serif text-lg font-semibold text-zinc-200">
+          Collected by
+        </h2>
+        <div className="flex gap-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-8 w-24 animate-pulse rounded-full bg-zinc-800" />
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
+
+const CommentSection = dynamic(
+  () => import("@/components/Moment/CommentSection"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="mt-10">
+        <h2 className="mb-4 font-serif text-lg font-semibold text-zinc-200">Comments</h2>
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-3 w-24 rounded bg-zinc-800" />
+              <div className="mt-1.5 h-3 w-48 rounded bg-zinc-800/60" />
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  }
+);
 
 export default function MomentDetail({ id }: { id: string }) {
   const { tracks } = useTimeline();
@@ -87,7 +125,6 @@ export default function MomentDetail({ id }: { id: string }) {
                   }`}
                   sizes="(max-width: 768px) 100vw, 384px"
                   priority
-                  unoptimized
                   onLoad={() => setImageLoaded(true)}
                 />
               </>

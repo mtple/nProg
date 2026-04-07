@@ -39,7 +39,6 @@ export default function AudioPlayer() {
                   fill
                   className="object-cover"
                   sizes="56px"
-                  unoptimized
                 />
               ) : (
                 <div className="h-full w-full bg-zinc-800" />

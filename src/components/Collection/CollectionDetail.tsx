@@ -1,10 +1,21 @@
 "use client";
 
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import FeedGrid from "@/components/Feed/FeedGrid";
 import { useTimeline } from "@/hooks/useTimeline";
 import Scribble from "@/components/ui/Scribble";
+
+function FeedGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {[...Array(10)].map((_, i) => (
+        <div key={i} className="aspect-square animate-pulse rounded-lg bg-zinc-800" />
+      ))}
+    </div>
+  );
+}
 
 export default function CollectionDetail({ address }: { address: string }) {
   const { tracks } = useTimeline(undefined, address);
@@ -38,7 +49,6 @@ export default function CollectionDetail({ address }: { address: string }) {
                 fill
                 className="object-cover"
                 sizes="128px"
-                unoptimized
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
@@ -59,7 +69,9 @@ export default function CollectionDetail({ address }: { address: string }) {
         </div>
       )}
 
-      <FeedGrid collection={address} />
+      <Suspense fallback={<FeedGridSkeleton />}>
+        <FeedGrid collection={address} />
+      </Suspense>
     </div>
   );
 }

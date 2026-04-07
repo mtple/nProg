@@ -6,12 +6,16 @@ export function useScrollArrows() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const rafId = useRef(0);
 
   const update = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 1);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    cancelAnimationFrame(rafId.current);
+    rafId.current = requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      setCanScrollLeft(el.scrollLeft > 1);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    });
   }, []);
 
   useEffect(() => {
@@ -28,6 +32,7 @@ export function useScrollArrows() {
       el.removeEventListener("scroll", update);
       ro.disconnect();
       mo.disconnect();
+      cancelAnimationFrame(rafId.current);
     };
   }, [update]);
 

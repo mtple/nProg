@@ -51,7 +51,6 @@ export default function TrackTile({
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
               sizes="(max-width: 640px) 176px, 208px"
-              unoptimized
               onLoad={() => setLoadedSrc(track.artworkUrl)}
             />
           </>

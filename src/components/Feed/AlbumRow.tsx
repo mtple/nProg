@@ -38,7 +38,6 @@ function AlbumCard({ album }: { album: Album }) {
                 imageLoaded ? "opacity-100" : "opacity-0"
               }`}
               sizes="(max-width: 640px) 160px, 192px"
-              unoptimized
               onLoad={() => setImageLoaded(true)}
             />
           </>

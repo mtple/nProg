@@ -1,6 +1,6 @@
 export const API_BASE = "https://api.inprocess.world/api";
 
-export const TIMELINE_PAGE_SIZE = 100;
+export const TIMELINE_PAGE_SIZE = 50;
 
 export const MIN_INITIAL_TRACKS = 12;
 

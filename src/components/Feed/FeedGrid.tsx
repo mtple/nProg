@@ -14,7 +14,9 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
   const { tracks, isLoading, isFetchingMore, hasMore, loadMore, error } =
     useTimeline(artist, collection);
 
-  // Build address→username lookup from timeline tracks
+  const { tracks: collectedTracks, isLoading: isCollectedLoading } = useRecentlyCollected();
+
+  // Build address->username lookup from timeline tracks and apply to collected tracks
   const artistNames = useMemo(() => {
     const map = new Map<string, string>();
     for (const track of tracks) {
@@ -26,7 +28,13 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     return map;
   }, [tracks]);
 
-  const { tracks: collectedTracks } = useRecentlyCollected(artistNames);
+  const resolvedCollectedTracks = useMemo(() => {
+    if (!artistNames.size) return collectedTracks;
+    return collectedTracks.map((track) => {
+      const name = artistNames.get(track.artistAddress.toLowerCase());
+      return name && name !== track.artist ? { ...track, artist: name } : track;
+    });
+  }, [collectedTracks, artistNames]);
 
   // Group tracks by artist (home page only)
   const artistGroups = useMemo(() => {
@@ -88,24 +96,24 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Scribble className="h-20 w-20 text-zinc-500" />
-      </div>
-    );
-  }
-
-  if (tracks.length === 0) {
-    return (
-      <div className="flex items-center justify-center py-20 text-zinc-400">
-        <p>No tracks found</p>
-      </div>
-    );
-  }
-
-  // Artist or collection page: simple grid
+  // Artist or collection page: block on loading
   if (artist || collection) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-32">
+          <Scribble className="h-20 w-20 text-zinc-500" />
+        </div>
+      );
+    }
+
+    if (tracks.length === 0) {
+      return (
+        <div className="flex items-center justify-center py-20 text-zinc-400">
+          <p>No tracks found</p>
+        </div>
+      );
+    }
+
     return (
       <div>
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -128,21 +136,38 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     );
   }
 
-  // Home page: Latest → Collections → Artist mosaic
+  // Home page: sections render independently
   return (
     <div className="space-y-7">
-      <TrackRow
-        title="Latest"
-        tracks={tracks}
-        allTracks={tracks}
-      />
-
-      {collectedTracks.length > 0 && !artist && !collection && (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <Scribble className="h-16 w-16 text-zinc-500" />
+        </div>
+      ) : tracks.length > 0 ? (
         <TrackRow
-          title="Recently Collected"
-          tracks={collectedTracks}
-          allTracks={collectedTracks}
+          title="Latest"
+          tracks={tracks}
+          allTracks={tracks}
         />
+      ) : null}
+
+      {!artist && !collection && !isLoading && (
+        isCollectedLoading ? (
+          <section>
+            <h2 className="mb-3 font-serif text-lg font-semibold text-zinc-200">Recently Collected</h2>
+            <div className="flex gap-4 overflow-hidden">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-44 w-44 flex-shrink-0 animate-pulse rounded-lg bg-zinc-800/50" />
+              ))}
+            </div>
+          </section>
+        ) : resolvedCollectedTracks.length > 0 ? (
+          <TrackRow
+            title="Recently Collected"
+            tracks={resolvedCollectedTracks}
+            allTracks={resolvedCollectedTracks}
+          />
+        ) : null
       )}
 
       {albums && albums.length > 0 && (
@@ -153,7 +178,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
         <ArtistMosaic groups={artistGroups} allTracks={tracks} />
       )}
 
-      {hasMore && (
+      {hasMore && !isLoading && (
         <div className="flex justify-center pb-4">
           <button
             onClick={() => loadMore()}

@@ -7,7 +7,7 @@ import type { Payment } from "@/lib/api";
 import { resolveMediaUrl, resolveAudioUrl } from "@/lib/resolveMediaUrl";
 import type { Track } from "@/types/audio";
 
-function paymentToTrack(payment: Payment, artistNames: Map<string, string>): Track | null {
+function paymentToTrack(payment: Payment): Track | null {
   const { moment } = payment;
   const meta = moment.metadata;
 
@@ -18,12 +18,11 @@ function paymentToTrack(payment: Payment, artistNames: Map<string, string>): Tra
   if (!audioUrl) return null;
 
   const creatorAddress = moment.collection.creator;
-  const artist = artistNames.get(creatorAddress.toLowerCase()) || creatorAddress;
 
   return {
     id: moment.id,
     title: meta.name || "Untitled",
-    artist,
+    artist: creatorAddress,
     artistAddress: creatorAddress,
     artworkUrl: resolveMediaUrl(meta.image || ""),
     audioUrl,
@@ -35,7 +34,7 @@ function paymentToTrack(payment: Payment, artistNames: Map<string, string>): Tra
   };
 }
 
-export function useRecentlyCollected(artistNames: Map<string, string>) {
+export function useRecentlyCollected() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["recentlyCollected"],
     queryFn: () => fetchPayments(undefined, 1, 20),
@@ -47,14 +46,14 @@ export function useRecentlyCollected(artistNames: Map<string, string>) {
     const result: Track[] = [];
     const seen = new Set<string>();
     for (const payment of data.payments) {
-      const track = paymentToTrack(payment, artistNames);
+      const track = paymentToTrack(payment);
       if (track && !seen.has(track.id)) {
         seen.add(track.id);
         result.push(track);
       }
     }
     return result;
-  }, [data, artistNames]);
+  }, [data]);
 
   return { tracks, isLoading, error };
 }
