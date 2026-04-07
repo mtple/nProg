@@ -1,13 +1,11 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fetchTimeline, fetchMetadata } from "@/lib/api";
+import { fetchTimeline } from "@/lib/api";
 import { resolveMediaUrl, resolveAudioUrl } from "@/lib/resolveMediaUrl";
 import { BLOCKED_ADDRESSES, TIMELINE_PAGE_SIZE, MIN_INITIAL_TRACKS } from "@/lib/consts";
 import type { Track } from "@/types/audio";
 import type { TimelineMoment } from "@/types/timeline";
-import type { TokenMetadata } from "@/types/metadata";
 
 const blockedSet = new Set(BLOCKED_ADDRESSES.map((a) => a.toLowerCase()));
 
@@ -15,10 +13,15 @@ function isBlocked(moment: TimelineMoment): boolean {
   return blockedSet.has(moment.creator.address.toLowerCase());
 }
 
-function toTrack(moment: TimelineMoment, metadata: TokenMetadata): Track {
+function toTrack(moment: TimelineMoment): Track | null {
+  const { metadata } = moment;
+  if (!metadata) return null;
+
   const audioUrl =
     resolveAudioUrl(metadata.content?.uri || "") ||
     resolveAudioUrl(metadata.animation_url || "");
+
+  if (!audioUrl) return null;
 
   return {
     id: moment.id,
@@ -66,78 +69,19 @@ function diversifyTracks(tracks: Track[]): Track[] {
   return result;
 }
 
-/** Resolve metadata with concurrency limit, streaming results via callback */
-async function resolveMetadataStreaming(
-  moments: TimelineMoment[],
-  queryClient: ReturnType<typeof useQueryClient>,
-  onTracks: (tracks: Track[]) => void,
-  concurrency = 20
-) {
-  const valid = moments.filter((m) => !isBlocked(m));
-  if (valid.length === 0) return;
-
-  let active = 0;
-  let index = 0;
-  const pending: Track[] = [];
-  let flushTimer: ReturnType<typeof setTimeout> | null = null;
-
-  function flush() {
-    if (pending.length > 0) {
-      onTracks(pending.splice(0));
-    }
-    flushTimer = null;
+function resolveMoments(moments: TimelineMoment[]): Track[] {
+  const tracks: Track[] = [];
+  for (const m of moments) {
+    if (isBlocked(m)) continue;
+    const track = toTrack(m);
+    if (track) tracks.push(track);
   }
-
-  // Batch flush every 50ms so we don't setState per-track
-  function scheduleFlush() {
-    if (!flushTimer) {
-      flushTimer = setTimeout(flush, 50);
-    }
-  }
-
-  return new Promise<void>((resolve) => {
-    function next() {
-      while (active < concurrency && index < valid.length) {
-        const m = valid[index++];
-        active++;
-        queryClient
-          .fetchQuery({
-            queryKey: ["metadata", m.uri],
-            queryFn: () => fetchMetadata(m.uri),
-            staleTime: Infinity,
-            retry: false,
-          })
-          .then((metadata) => {
-            if (metadata) {
-              const track = toTrack(m, metadata);
-              if (track.audioUrl) {
-                pending.push(track);
-                scheduleFlush();
-              }
-            }
-          })
-          .catch(() => {})
-          .finally(() => {
-            active--;
-            if (index < valid.length) {
-              next();
-            } else if (active === 0) {
-              // All done — flush remaining
-              if (flushTimer) clearTimeout(flushTimer);
-              flush();
-              resolve();
-            }
-          });
-      }
-    }
-    next();
-  });
+  return tracks;
 }
 
 const PAGES_PER_BATCH = 2;
 
 export function useTimeline(artist?: string, collection?: string) {
-  const queryClient = useQueryClient();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -156,7 +100,6 @@ export function useTimeline(artist?: string, collection?: string) {
       if (unique.length === 0) return prev;
       return [...prev, ...unique];
     });
-    // Clear loading as soon as first tracks arrive
     setIsLoading(false);
   }, []);
 
@@ -183,10 +126,6 @@ export function useTimeline(artist?: string, collection?: string) {
         (_, i) => startPage + i
       );
 
-      // Fetch pages and start resolving metadata as each arrives.
-      // Don't await metadata — let it stream in the background.
-      const resolvePromises: Promise<void>[] = [];
-
       const timelineResults = await Promise.allSettled(
         pageNumbers.map((p) =>
           fetchTimeline(p, TIMELINE_PAGE_SIZE, artist, collection, {
@@ -202,18 +141,9 @@ export function useTimeline(artist?: string, collection?: string) {
 
         totalPagesRef.current = result.value.pagination.total_pages;
 
-        // Fire off metadata resolution — don't await, let it stream
-        resolvePromises.push(
-          resolveMetadataStreaming(
-            result.value.moments,
-            queryClient,
-            appendTracks,
-          )
-        );
+        const newTracks = resolveMoments(result.value.moments);
+        appendTracks(newTracks);
       }
-
-      // Wait for all metadata to finish before allowing next batch
-      await Promise.allSettled(resolvePromises);
 
       if (mountedRef.current) {
         nextPageRef.current = endPage + 1;
@@ -233,7 +163,7 @@ export function useTimeline(artist?: string, collection?: string) {
       fetchingRef.current = false;
       if (mountedRef.current) setIsFetchingMore(false);
     }
-  }, [artist, collection, queryClient, appendTracks]);
+  }, [artist, collection, appendTracks]);
 
   useEffect(() => {
     mountedRef.current = true;

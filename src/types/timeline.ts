@@ -19,6 +19,14 @@ export interface TimelineMoment {
   creator: Creator;
   admins: Admin[];
   created_at: string;
+  metadata: {
+    name: string;
+    image: string;
+    description?: string;
+    content?: { uri: string; mime: string };
+    animation_url?: string;
+    external_url?: string;
+  };
 }
 
 export interface Pagination {
