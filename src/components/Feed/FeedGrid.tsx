@@ -22,7 +22,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     if (!el || !hasMore || isFetchingMore) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMore(); },
-      { rootMargin: "400px" },
+      { rootMargin: "1500px" },
     );
     observer.observe(el);
     return () => observer.disconnect();
