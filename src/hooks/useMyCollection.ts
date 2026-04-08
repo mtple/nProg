@@ -71,7 +71,7 @@ export function useMyCollection() {
   } = useInfiniteQuery({
     queryKey: ["myCollection", userAddress],
     queryFn: ({ pageParam = 1 }) =>
-      fetchPayments(userAddress!, pageParam, PAGE_SIZE),
+      fetchPayments(userAddress!, pageParam, PAGE_SIZE, "audio"),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, total_pages } = lastPage.pagination;

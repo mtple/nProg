@@ -112,6 +112,7 @@ export async function fetchPayments(
   collector?: string,
   page: number = 1,
   limit: number = 20,
+  contentType?: string,
 ): Promise<PaymentsResponse> {
   const params = new URLSearchParams({
     page: String(page),
@@ -119,6 +120,7 @@ export async function fetchPayments(
     chainId: "8453",
   });
   if (collector) params.set("collector", collector);
+  if (contentType) params.set("content_type", contentType);
   const res = await fetch(`${API_BASE}/payments?${params}`);
   if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
   const json = await res.json();

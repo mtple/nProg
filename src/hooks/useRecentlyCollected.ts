@@ -37,7 +37,7 @@ function paymentToTrack(payment: Payment): Track | null {
 export function useRecentlyCollected() {
   const { data, isPending, error } = useQuery({
     queryKey: ["recentlyCollected"],
-    queryFn: () => fetchPayments(undefined, 1, 50),
+    queryFn: () => fetchPayments(undefined, 1, 50, "audio"),
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });
