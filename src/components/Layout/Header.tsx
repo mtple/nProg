@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/AuthProvider";
+import InProcessRadioLogo from "@/components/ui/InProcessRadioLogo";
 
 export default function Header() {
   const { isLoggedIn, email, sendCode, login, logout } = useAuth();
@@ -141,8 +142,8 @@ export default function Header() {
         style={{ paddingTop: "var(--safe-area-top)" }}
       >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="font-serif text-4xl font-black italic tracking-tight text-zinc-50">
-            nProg
+          <Link href="/" className="text-zinc-50">
+            <InProcessRadioLogo className="h-14 w-auto" />
           </Link>
 
           <div className="relative">
