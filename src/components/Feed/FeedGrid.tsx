@@ -151,23 +151,12 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
         />
       ) : null}
 
-      {!artist && !collection && (
-        isCollectedLoading && !isLoading ? (
-          <section>
-            <h2 className="mb-3 font-serif text-lg font-semibold text-zinc-200">Recently Collected</h2>
-            <div className="flex gap-4 overflow-hidden">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-44 w-44 flex-shrink-0 animate-pulse rounded-lg bg-zinc-800/50" />
-              ))}
-            </div>
-          </section>
-        ) : resolvedCollectedTracks.length > 0 ? (
-          <TrackRow
-            title="Recently Collected"
-            tracks={resolvedCollectedTracks}
-            allTracks={resolvedCollectedTracks}
-          />
-        ) : null
+      {!artist && !collection && resolvedCollectedTracks.length > 0 && (
+        <TrackRow
+          title="Recently Collected"
+          tracks={resolvedCollectedTracks}
+          allTracks={resolvedCollectedTracks}
+        />
       )}
 
       {albums && albums.length > 0 && (

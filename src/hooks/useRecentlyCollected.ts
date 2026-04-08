@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { fetchPayments } from "@/lib/api";
 import type { Payment } from "@/lib/api";
@@ -35,11 +35,11 @@ function paymentToTrack(payment: Payment): Track | null {
 }
 
 export function useRecentlyCollected() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isPending, error } = useQuery({
     queryKey: ["recentlyCollected"],
-    queryFn: () => fetchPayments(undefined, 1, 20),
+    queryFn: () => fetchPayments(undefined, 1, 50),
     staleTime: 5 * 60 * 1000,
-    placeholderData: keepPreviousData,
+    retry: 2,
   });
 
   const tracks = useMemo(() => {
@@ -56,5 +56,5 @@ export function useRecentlyCollected() {
     return result;
   }, [data]);
 
-  return { tracks, isLoading, error };
+  return { tracks, isLoading: isPending, error };
 }

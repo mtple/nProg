@@ -116,13 +116,14 @@ export async function fetchPayments(
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    content_type: "audio",
     chainId: "8453",
   });
   if (collector) params.set("collector", collector);
   const res = await fetch(`${API_BASE}/payments?${params}`);
   if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
-  return res.json();
+  const json = await res.json();
+  if (json.status === "error") throw new Error(json.message || "Payments fetch failed");
+  return json;
 }
 
 export interface Collector {
