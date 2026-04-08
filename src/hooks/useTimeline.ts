@@ -79,7 +79,7 @@ function resolveMoments(moments: TimelineMoment[]): Track[] {
   return tracks;
 }
 
-const PAGES_PER_BATCH = 2;
+const PAGES_PER_BATCH = 1;
 
 export function useTimeline(artist?: string, collection?: string) {
   const [tracks, setTracks] = useState<Track[]>([]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef } from "react";
 import { useTimeline } from "@/hooks/useTimeline";
 import { useRecentlyCollected } from "@/hooks/useRecentlyCollected";
 import TrackTile from "./TrackTile";
@@ -15,6 +15,18 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
     useTimeline(artist, collection);
 
   const { tracks: collectedTracks, isLoading: isCollectedLoading } = useRecentlyCollected();
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore || isFetchingMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: "400px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, isFetchingMore, loadMore]);
 
   // Build address->username lookup from timeline tracks and apply to collected tracks
   const artistNames = useMemo(() => {
@@ -48,7 +60,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
       }
       groups.get(key)!.tracks.push(track);
     }
-    return Array.from(groups.values());
+    return Array.from(groups.values()).filter((g) => g.tracks.length >= 2);
   }, [tracks, artist, collection]);
 
   // Derive albums from audio tracks (home page only)
@@ -122,14 +134,8 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
           ))}
         </div>
         {hasMore && (
-          <div className="mt-10 flex justify-center">
-            <button
-              onClick={() => loadMore()}
-              disabled={isFetchingMore}
-              className="rounded-full border border-zinc-700 px-6 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
-            >
-              {isFetchingMore ? "Loading..." : "Load more"}
-            </button>
+          <div ref={sentinelRef} className="mt-10 flex justify-center">
+            {isFetchingMore && <Scribble className="h-10 w-10 text-zinc-500" />}
           </div>
         )}
       </div>
@@ -168,14 +174,8 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
       )}
 
       {hasMore && !isLoading && (
-        <div className="flex justify-center pb-4">
-          <button
-            onClick={() => loadMore()}
-            disabled={isFetchingMore}
-            className="rounded-full border border-zinc-700 px-6 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-zinc-800 disabled:opacity-50"
-          >
-            {isFetchingMore ? "Loading..." : "Discover more"}
-          </button>
+        <div ref={sentinelRef} className="flex justify-center pb-4">
+          {isFetchingMore && <Scribble className="h-10 w-10 text-zinc-500" />}
         </div>
       )}
     </div>

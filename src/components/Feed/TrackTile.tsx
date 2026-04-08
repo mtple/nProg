@@ -17,6 +17,7 @@ export default function TrackTile({
 }) {
   const { play, currentTrack, isPlaying, isBuffering, toggle } = useAudio();
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
   const imageLoaded = loadedSrc === track.artworkUrl;
 
   const isCurrentTrack = currentTrack?.id === track.id;
@@ -36,7 +37,7 @@ export default function TrackTile({
   return (
     <div className="group">
       <div className="relative aspect-square overflow-hidden rounded bg-zinc-900">
-        {track.artworkUrl ? (
+        {track.artworkUrl && !imgError ? (
           <>
             {!imageLoaded && (
               <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
@@ -52,6 +53,7 @@ export default function TrackTile({
               }`}
               sizes="(max-width: 640px) 176px, 208px"
               onLoad={() => setLoadedSrc(track.artworkUrl)}
+              onError={() => setImgError(true)}
             />
           </>
         ) : (
