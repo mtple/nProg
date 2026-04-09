@@ -1,21 +1,28 @@
 {
   "accountAssociation": {
-    "header": "",
-    "payload": "",
-    "signature": ""
+    "header": "eyJmaWQiOjY1OTEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgxMEU1NjZBZTI3RDZEMjI4MDFGOEZENDNjMWE2MTlDODQxN0RhMURFIn0",
+    "payload": "eyJkb21haW4iOiJyYWRpby5pbnByb2Nlc3Mud29ybGQifQ",
+    "signature": "gLXe55fzaNcYajtQpaQniACJDo2RNvxgrn2n+pVynac0+o/7bYJPIGhY5JIFGbvC/OOGapUL9EwJXfpklXRLxhw="
   },
   "miniapp": {
     "version": "1",
     "name": "nProg",
-    "iconUrl": "/favicon-96x96.png",
-    "homeUrl": "/",
-    "description": "The sounds of In Process",
-    "imageUrl": "/embed.png",
+    "iconUrl": "https://radio.inprocess.world/web-app-manifest-512x512.png",
+    "homeUrl": "https://radio.inprocess.world",
+    "imageUrl": "https://radio.inprocess.world/embed.png",
     "buttonTitle": "Listen Now",
-    "splashImageUrl": "/favicon-96x96.png",
+    "splashImageUrl": "https://radio.inprocess.world/web-app-manifest-512x512.png",
     "splashBackgroundColor": "#131112",
-    "subtitle": "Music from the InProcess timeline",
-    "primaryCategory": "entertainment",
-    "tags": ["music", "web3", "nft", "inprocess"]
+    "webhookUrl": "https://radio.inprocess.world/api/webhook",
+    "subtitle": "Sounds of In Process",
+    "description": "A radio for the In Process timeline. Discover and play music from onchain artists.",
+    "primaryCategory": "music",
+    "tags": ["music", "web3", "nft", "inprocess", "radio"],
+    "heroImageUrl": "https://radio.inprocess.world/embed.png",
+    "tagline": "The sounds of In Process",
+    "ogTitle": "nProg",
+    "ogDescription": "The sounds of In Process",
+    "ogImageUrl": "https://radio.inprocess.world/embed.png",
+    "canonicalDomain": "radio.inprocess.world"
   }
 }

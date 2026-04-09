@@ -34,22 +34,25 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  metadataBase: new URL("https://radio.inprocess.world"),
   openGraph: {
     title: "nProg",
     description: "The sounds of In Process",
-    images: [{ url: "/embed.png", width: 1200, height: 800 }],
+    images: [{ url: "https://radio.inprocess.world/embed.png", width: 1200, height: 800 }],
     type: "website",
+    url: "https://radio.inprocess.world",
   },
   other: {
     "fc:miniapp": JSON.stringify({
       version: "1",
-      imageUrl: "/embed.png",
+      imageUrl: "https://radio.inprocess.world/embed.png",
       button: {
         title: "Listen Now",
         action: {
           type: "launch_frame",
           name: "nProg",
-          splashImageUrl: "/favicon-96x96.png",
+          url: "https://radio.inprocess.world",
+          splashImageUrl: "https://radio.inprocess.world/web-app-manifest-512x512.png",
           splashBackgroundColor: "#131112",
         },
       },
