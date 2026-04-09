@@ -22,6 +22,10 @@ export default function Header() {
   const pathname = usePathname();
   const [showLogin, setShowLogin] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  // menuMounted keeps the sheet in the DOM during the close animation.
+  // menuOpen drives the visible-state classes (transform/opacity).
+  const [menuMounted, setMenuMounted] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
@@ -50,6 +54,31 @@ export default function Header() {
   useEffect(() => {
     setShowMenu(false);
   }, [pathname]);
+
+  // Drive the mount/animate/unmount lifecycle for the mobile menu.
+  // When opening: mount first, then flip open after the browser has
+  // painted the initial closed state. A single rAF isn't enough — React
+  // commits the DOM in the same frame, so rAF fires before paint and
+  // the transition has nothing to animate from. Double rAF guarantees
+  // the initial state is painted before we flip to the open state.
+  // When closing: flip open=false, wait for the transition, then unmount.
+  useEffect(() => {
+    if (showMenu) {
+      setMenuMounted(true);
+      let raf2 = 0;
+      const raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setMenuOpen(true));
+      });
+      return () => {
+        cancelAnimationFrame(raf1);
+        if (raf2) cancelAnimationFrame(raf2);
+      };
+    } else if (menuMounted) {
+      setMenuOpen(false);
+      const t = setTimeout(() => setMenuMounted(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [showMenu, menuMounted]);
 
   const handleSendCode = async () => {
     setLoading(true);
@@ -189,27 +218,25 @@ export default function Header() {
           </nav>
 
           <div className="relative flex items-center gap-3">
-            {/* Desktop auth controls */}
-            <div className="hidden sm:block">
-              {isLoggedIn ? (
-                <div className="flex items-center gap-3">
-                  <span className="hidden text-sm text-zinc-400 md:inline">{email}</span>
-                  <button
-                    onClick={logout}
-                    className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
-                  >
-                    Log out
-                  </button>
-                </div>
-              ) : (
+            {/* Auth controls — always visible */}
+            {isLoggedIn ? (
+              <div className="flex items-center gap-3">
+                <span className="hidden text-sm text-zinc-400 md:inline">{email}</span>
                 <button
-                  onClick={() => setShowLogin(!showLogin)}
-                  className="text-sm font-medium text-zinc-300 transition-colors hover:text-zinc-50"
+                  onClick={logout}
+                  className="text-sm text-zinc-500 transition-colors hover:text-zinc-300"
                 >
-                  Log in
+                  Log out
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowLogin(!showLogin)}
+                className="text-sm font-medium text-zinc-300 transition-colors hover:text-zinc-50"
+              >
+                Log in
+              </button>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -246,14 +273,20 @@ export default function Header() {
       </header>
 
       {/* Mobile nav sheet */}
-      {showMenu && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:hidden">
+      {menuMounted && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center sm:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+              menuOpen ? "opacity-100" : "opacity-0"
+            }`}
             onClick={() => setShowMenu(false)}
           />
-          <div className="relative w-full rounded-t-2xl border-t border-zinc-800 bg-zinc-900 px-5 pb-8 pt-4">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-zinc-700" />
+          <div
+            className={`relative w-full rounded-b-2xl border-b border-zinc-800 bg-zinc-900 px-5 pb-6 pt-4 transition-transform duration-300 ease-out ${
+              menuOpen ? "translate-y-0" : "-translate-y-full"
+            }`}
+            style={{ paddingTop: "calc(var(--safe-area-top) + 1rem)" }}
+          >
             <nav className="flex flex-col">
               {navLinks.map((link) => (
                 <Link
@@ -268,32 +301,6 @@ export default function Header() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-4">
-              {isLoggedIn ? (
-                <div className="flex items-center justify-between">
-                  <span className="truncate text-xs text-zinc-500">{email}</span>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowMenu(false);
-                    }}
-                    className="text-sm text-zinc-400 transition-colors hover:text-zinc-200"
-                  >
-                    Log out
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setShowMenu(false);
-                    setShowLogin(true);
-                  }}
-                  className="w-full rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-white"
-                >
-                  Log in
-                </button>
-              )}
-            </div>
             <button
               type="button"
               onClick={() => setShowMenu(false)}
@@ -301,6 +308,7 @@ export default function Header() {
             >
               Close
             </button>
+            <div className="mx-auto mt-4 h-1 w-10 rounded-full bg-zinc-700" />
           </div>
         </div>
       )}
