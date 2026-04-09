@@ -111,7 +111,7 @@ export interface PaymentsResponse {
 export async function fetchPayments(
   collector?: string,
   page: number = 1,
-  limit: number = 20,
+  limit: number = 200,
   contentType?: string,
 ): Promise<PaymentsResponse> {
   const params = new URLSearchParams({
@@ -121,7 +121,9 @@ export async function fetchPayments(
   });
   if (collector) params.set("collector", collector);
   if (contentType) params.set("content_type", contentType);
-  const res = await fetch(`${API_BASE}/payments?${params}`);
+  // Go through our Next.js proxy route so responses are cached server-side.
+  // Upstream /payments TTFB is 3–9s; the proxy turns repeat requests instant.
+  const res = await fetch(`/api/payments?${params}`);
   if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
   const json = await res.json();
   if (json.status === "error") throw new Error(json.message || "Payments fetch failed");

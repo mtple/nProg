@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchCollectors } from "@/lib/api";
 import type { Collector } from "@/lib/api";
 import { truncateAddress } from "@/lib/utils";
@@ -53,15 +54,16 @@ export default function CollectedBy({
       </h2>
       <div className="flex flex-wrap gap-2">
         {collectors.map((c) => (
-          <span
+          <Link
             key={c.address}
-            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300"
+            href={`/collector/${c.address}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:border-zinc-700 hover:bg-zinc-800 hover:text-zinc-50"
           >
             {c.username || truncateAddress(c.address)}
             {c.quantity > 1 && (
               <span className="text-xs text-zinc-500">x{c.quantity}</span>
             )}
-          </span>
+          </Link>
         ))}
       </div>
     </div>

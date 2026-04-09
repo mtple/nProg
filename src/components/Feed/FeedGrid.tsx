@@ -9,6 +9,7 @@ import AlbumRow from "./AlbumRow";
 import type { Album } from "./AlbumRow";
 import ArtistMosaic from "./ArtistMosaic";
 import Scribble from "@/components/ui/Scribble";
+import { groupTracksByArtist } from "@/lib/artists";
 
 export default function FeedGrid({ artist, collection }: { artist?: string; collection?: string }) {
   const { tracks, isLoading, isFetchingMore, hasMore, loadMore, error } =
@@ -51,16 +52,7 @@ export default function FeedGrid({ artist, collection }: { artist?: string; coll
   // Group tracks by artist (home page only)
   const artistGroups = useMemo(() => {
     if (artist || collection) return null;
-
-    const groups = new Map<string, { name: string; address: string; tracks: typeof tracks }>();
-    for (const track of tracks) {
-      const key = track.artistAddress.toLowerCase();
-      if (!groups.has(key)) {
-        groups.set(key, { name: track.artist, address: track.artistAddress, tracks: [] });
-      }
-      groups.get(key)!.tracks.push(track);
-    }
-    return Array.from(groups.values()).filter((g) => g.tracks.length >= 2);
+    return groupTracksByArtist(tracks);
   }, [tracks, artist, collection]);
 
   // Derive albums from audio tracks (home page only)
