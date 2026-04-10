@@ -26,6 +26,9 @@ export default function Header() {
   // menuOpen drives the visible-state classes (transform/opacity).
   const [menuMounted, setMenuMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Same mount/open pattern for the mobile login sheet.
+  const [loginMounted, setLoginMounted] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"email" | "code">("email");
@@ -79,6 +82,27 @@ export default function Header() {
       return () => clearTimeout(t);
     }
   }, [showMenu, menuMounted]);
+
+  // Same lifecycle for the mobile login sheet — only active when
+  // logged out, matching the render condition below.
+  useEffect(() => {
+    const shouldShow = showLogin && !isLoggedIn;
+    if (shouldShow) {
+      setLoginMounted(true);
+      let raf2 = 0;
+      const raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setLoginOpen(true));
+      });
+      return () => {
+        cancelAnimationFrame(raf1);
+        if (raf2) cancelAnimationFrame(raf2);
+      };
+    } else if (loginMounted) {
+      setLoginOpen(false);
+      const t = setTimeout(() => setLoginMounted(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [showLogin, isLoggedIn, loginMounted]);
 
   const handleSendCode = async () => {
     setLoading(true);
@@ -314,14 +338,20 @@ export default function Header() {
       )}
 
       {/* Mobile full-screen modal — outside header to avoid stacking context issues */}
-      {showLogin && !isLoggedIn && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center sm:hidden">
+      {loginMounted && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center sm:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+              loginOpen ? "opacity-100" : "opacity-0"
+            }`}
             onClick={closeLogin}
           />
-          <div className="relative w-full rounded-t-2xl border-t border-zinc-800 bg-zinc-900 px-5 pb-8 pt-4">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-zinc-700" />
+          <div
+            className={`relative w-full rounded-b-2xl border-b border-zinc-800 bg-zinc-900 px-5 pb-6 pt-4 transition-transform duration-300 ease-out ${
+              loginOpen ? "translate-y-0" : "-translate-y-full"
+            }`}
+            style={{ paddingTop: "calc(var(--safe-area-top) + 1rem)" }}
+          >
             <h2 className="mb-4 text-center font-serif text-lg font-semibold text-zinc-50">
               Log in
             </h2>
@@ -333,6 +363,7 @@ export default function Header() {
             >
               Cancel
             </button>
+            <div className="mx-auto mt-4 h-1 w-10 rounded-full bg-zinc-700" />
           </div>
         </div>
       )}
