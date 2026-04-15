@@ -75,15 +75,8 @@ export async function fetchComments(
   return res.json();
 }
 
-export interface PaymentMoment {
-  id: string;
+export interface TransferMoment {
   token_id: number;
-  uri: string;
-  collection: {
-    address: string;
-    chain_id: number;
-    creator: string;
-  };
   metadata: {
     name: string;
     image: string;
@@ -92,28 +85,36 @@ export interface PaymentMoment {
     animation_url?: string;
     external_url?: string;
   };
+  collection: {
+    address: string;
+    chain_id: number;
+    protocol: string;
+    artist: { address: string; username: string | null };
+  };
 }
 
-export interface Payment {
+export interface Transfer {
   id: string;
-  amount: string;
   transferred_at: string;
-  moment: PaymentMoment;
-  buyer: { address: string; username: string | null };
+  quantity: number;
+  value: string | number | null;
+  currency: string | null;
+  transaction_hash: string;
+  moment: TransferMoment;
+  collector: { address: string; username: string | null };
 }
 
-export interface PaymentsResponse {
-  status: string;
-  payments: Payment[];
+export interface TransfersResponse {
+  transfers: Transfer[];
   pagination: { total_count: number; page: number; limit: number; total_pages: number };
 }
 
-export async function fetchPayments(
+export async function fetchTransfers(
   collector?: string,
   page: number = 1,
-  limit: number = 200,
+  limit: number = 100,
   contentType?: string,
-): Promise<PaymentsResponse> {
+): Promise<TransfersResponse> {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
@@ -122,11 +123,11 @@ export async function fetchPayments(
   if (collector) params.set("collector", collector);
   if (contentType) params.set("content_type", contentType);
   // Go through our Next.js proxy route so responses are cached server-side.
-  // Upstream /payments TTFB is 3–9s; the proxy turns repeat requests instant.
-  const res = await fetch(`/api/payments?${params}`);
-  if (!res.ok) throw new Error(`Payments fetch failed: ${res.status}`);
+  // Upstream /transfers TTFB is 3–9s; the proxy turns repeat requests instant.
+  const res = await fetch(`/api/transfers?${params}`);
+  if (!res.ok) throw new Error(`Transfers fetch failed: ${res.status}`);
   const json = await res.json();
-  if (json.status === "error") throw new Error(json.message || "Payments fetch failed");
+  if (json.status === "error") throw new Error(json.message || "Transfers fetch failed");
   return json;
 }
 

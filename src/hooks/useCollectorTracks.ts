@@ -2,15 +2,15 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { fetchPayments } from "@/lib/api";
-import type { Payment } from "@/lib/api";
+import { fetchTransfers } from "@/lib/api";
+import type { Transfer } from "@/lib/api";
 import { resolveMediaUrl, resolveAudioUrl } from "@/lib/resolveMediaUrl";
 import type { Track } from "@/types/audio";
 
 const PAGE_SIZE = 50;
 
-function paymentToTrack(payment: Payment): Track | null {
-  const { moment } = payment;
+function transferToTrack(transfer: Transfer): Track | null {
+  const { moment } = transfer;
   const meta = moment.metadata;
 
   const audioUrl =
@@ -19,16 +19,16 @@ function paymentToTrack(payment: Payment): Track | null {
 
   if (!audioUrl) return null;
 
-  const creatorAddress = moment.collection.creator;
+  const artist = moment.collection.artist;
 
   return {
-    id: moment.id,
+    id: `${moment.collection.address}-${moment.token_id}`,
     title: meta.name || "Untitled",
-    artist: creatorAddress,
-    artistAddress: creatorAddress,
+    artist: artist.username || artist.address,
+    artistAddress: artist.address,
     artworkUrl: resolveMediaUrl(meta.image || ""),
     audioUrl,
-    createdAt: payment.transferred_at,
+    createdAt: transfer.transferred_at,
     description: meta.description,
     address: moment.collection.address,
     tokenId: String(moment.token_id),
@@ -55,7 +55,7 @@ export function useCollectorTracks(address: string | undefined) {
   } = useInfiniteQuery({
     queryKey: ["collectorTracks", normalized],
     queryFn: ({ pageParam = 1 }) =>
-      fetchPayments(normalized!, pageParam, PAGE_SIZE, "audio"),
+      fetchTransfers(normalized!, pageParam, PAGE_SIZE, "audio"),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, total_pages } = lastPage.pagination;
@@ -70,8 +70,8 @@ export function useCollectorTracks(address: string | undefined) {
     const result: Track[] = [];
     const seen = new Set<string>();
     for (const page of data.pages) {
-      for (const payment of page.payments) {
-        const track = paymentToTrack(payment);
+      for (const transfer of page.transfers) {
+        const track = transferToTrack(transfer);
         if (track && !seen.has(track.id)) {
           seen.add(track.id);
           result.push(track);
@@ -83,10 +83,10 @@ export function useCollectorTracks(address: string | undefined) {
 
   const totalCount = data?.pages[0]?.pagination.total_count ?? 0;
 
-  // Username from the first payment's buyer, if available.
+  // Username from the first transfer's collector, if available.
   const username = useMemo(() => {
-    const firstBuyer = data?.pages[0]?.payments[0]?.buyer;
-    return firstBuyer?.username || null;
+    const firstCollector = data?.pages[0]?.transfers[0]?.collector;
+    return firstCollector?.username || null;
   }, [data]);
 
   return {

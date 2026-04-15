@@ -2,13 +2,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { fetchPayments } from "@/lib/api";
-import type { Payment } from "@/lib/api";
+import { fetchTransfers } from "@/lib/api";
+import type { Transfer } from "@/lib/api";
 import { resolveMediaUrl, resolveAudioUrl } from "@/lib/resolveMediaUrl";
 import type { Track } from "@/types/audio";
 
-function paymentToTrack(payment: Payment): Track | null {
-  const { moment } = payment;
+function transferToTrack(transfer: Transfer): Track | null {
+  const { moment } = transfer;
   const meta = moment.metadata;
 
   const audioUrl =
@@ -17,16 +17,16 @@ function paymentToTrack(payment: Payment): Track | null {
 
   if (!audioUrl) return null;
 
-  const creatorAddress = moment.collection.creator;
+  const artist = moment.collection.artist;
 
   return {
-    id: moment.id,
+    id: `${moment.collection.address}-${moment.token_id}`,
     title: meta.name || "Untitled",
-    artist: creatorAddress,
-    artistAddress: creatorAddress,
+    artist: artist.username || artist.address,
+    artistAddress: artist.address,
     artworkUrl: resolveMediaUrl(meta.image || ""),
     audioUrl,
-    createdAt: payment.transferred_at,
+    createdAt: transfer.transferred_at,
     description: meta.description,
     address: moment.collection.address,
     tokenId: String(moment.token_id),
@@ -37,17 +37,17 @@ function paymentToTrack(payment: Payment): Track | null {
 export function useRecentlyCollected() {
   const { data, isPending, error } = useQuery({
     queryKey: ["recentlyCollected"],
-    queryFn: () => fetchPayments(undefined, 1, 200, "audio"),
+    queryFn: () => fetchTransfers(undefined, 1, 100, "audio"),
     staleTime: 5 * 60 * 1000,
     retry: 2,
   });
 
   const tracks = useMemo(() => {
-    if (!data?.payments) return [];
+    if (!data?.transfers) return [];
     const result: Track[] = [];
     const seen = new Set<string>();
-    for (const payment of data.payments) {
-      const track = paymentToTrack(payment);
+    for (const transfer of data.transfers) {
+      const track = transferToTrack(transfer);
       if (track && !seen.has(track.id)) {
         seen.add(track.id);
         result.push(track);
