@@ -118,7 +118,6 @@ export async function fetchTransfers(
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
-    chainId: "8453",
   });
   if (collector) params.set("collector", collector);
   if (contentType) params.set("content_type", contentType);
